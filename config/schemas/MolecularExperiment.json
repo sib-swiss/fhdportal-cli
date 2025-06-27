@@ -1,151 +1,328 @@
 {
-  "type": "object",
-  "title": "MolecularExperiment",
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "required": [
-    "title",
-    "design_description",
-    "instrument_model_id",
-    "library_layout",
-    "library_strategy",
-    "library_source",
-    "library_selection"
-  ],
-  "properties": {
-    "title": {
-      "type": "string",
-      "title": "title",
-      "description": "The experiment alias"
-    },
-    "public_id": {
-      "type": "string",
-      "title": "Public ID",
-      "pattern": "^CHFEGAX[0-9]{11}.*",
-      "description": "Public Identifier of the experiment"
-    },
-    "library_name": {
-      "type": "string",
-      "title": "Library Name",
-      "description": "The name of the sequencing library"
-    },
-    "library_layout": {
-      "enum": ["PAIRED", "SINGLE"],
-      "type": "string",
-      "title": "Library Layout",
-      "default": "PAIRED",
-      "description": "Layout (paired or single) of the sequencing library"
-    },
-    "library_source": {
-      "enum": ["GENOMIC", "SYNTHETIC", "TRANSCRIPTOMIC"],
-      "type": "string",
-      "title": "Library Source",
-      "description": "Source/type of the sequencing library"
-    },
-    "extra_attributes": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["tag", "value"],
-        "properties": {
-          "tag": {
-            "type": "string"
-          },
-          "unit": {
-            "type": "string"
-          },
-          "value": {
-            "type": "string"
-          }
+    "type": "object",
+    "title": "ExperimentRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "required": [
+        "title",
+        "design_description",
+        "instrument_model_id",
+        "library_layout",
+        "library_strategy",
+        "library_source",
+        "library_selection"
+    ],
+    "properties": {
+        "title": {
+            "type": "string",
+            "title": "title",
+            "description": "The experiment alias"
+        },
+        "public_id": {
+            "type": "string",
+            "title": "Public ID",
+            "pattern": "^CHFEGAX[0-9]{11}.*",
+            "description": "Public Identifier of the experiment"
+        },
+        "library_name": {
+            "type": "string",
+            "title": "Library Name",
+            "description": "The name of the sequencing library"
+        },
+        "library_layout": {
+            "enum": [
+                "PAIRED",
+                "SINGLE"
+            ],
+            "type": "string",
+            "title": "Library Layout",
+            "default": "PAIRED",
+            "description": "Layout (paired or single) of the sequencing library"
+        },
+        "library_source": {
+            "enum": [
+                "GENOMIC",
+                "GENOMIC SINGLE CELL",
+                "TRANSCRIPTOMIC",
+                "TRANSCRIPTOMIC SINGLE CELL",
+                "METAGENOMIC",
+                "METATRANSCRIPTOMIC",
+                "SYNTHETIC",
+                "VIRAL RNA",
+                "OTHER"
+            ],
+            "type": "string",
+            "title": "Library Source",
+            "description": "Source/type of the sequencing library"
+        },
+        "extra_attributes": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "tag",
+                    "value"
+                ],
+                "properties": {
+                    "tag": {
+                        "type": "string"
+                    },
+                    "unit": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "type": "string"
+                    }
+                }
+            },
+            "title": "Extra Attributes",
+            "description": "Any extra attribute(s) to describe an experiment"
+        },
+        "library_strategy": {
+            "enum": [
+                "WGS",
+                "WGA",
+                "WXS",
+                "RNA-Seq",
+                "ssRNA-seq",
+                "miRNA-Seq",
+                "ncRNA-Seq",
+                "FL-cDNA",
+                "EST",
+                "Hi-C",
+                "ATAC-seq",
+                "WCS",
+                "RAD-Seq",
+                "CLONE",
+                "POOLCLONE",
+                "AMPLICON",
+                "CLONEEND",
+                "FINISHING",
+                "ChIP-Seq",
+                "MNase-Seq",
+                "DNase-Hypersensitivity",
+                "Bisulfite-Seq",
+                "CTS",
+                "MRE-Seq",
+                "MeDIP-Seq",
+                "MBD-Seq",
+                "Tn-Seq",
+                "VALIDATION",
+                "FAIRE-seq",
+                "SELEX",
+                "RIP-Seq",
+                "ChIA-PET",
+                "Synthetic-Long-Read",
+                "Targeted-Capture",
+                "Tethered Chromatin Conformation Capture",
+                "NOMe-Seq",
+                "ChM-Seq",
+                "GBS",
+                "OTHER",
+                "snRNA-seq",
+                "Ribo-Seq"
+            ],
+            "type": "string",
+            "title": "Library strategy / scope",
+            "default": "WGS",
+            "descripion": "Scope of the sequencing library"
+        },
+        "library_selection": {
+            "enum": [
+                "RANDOM",
+                "PCR",
+                "RANDOM PCR",
+                "RT-PCR",
+                "HMPR",
+                "MF",
+                "repeat fractionation",
+                "size fractionation",
+                "MSLL",
+                "cDNA",
+                "cDNA_randomPriming",
+                "cDNA_oligo_dT",
+                "PolyA",
+                "Oligo-dT",
+                "Inverse rRNA",
+                "Inverse rRNA selection",
+                "ChIP",
+                "ChIP-Seq",
+                "MNase",
+                "DNase",
+                "Hybrid Selection",
+                "Reduced Representation",
+                "Restriction Digest",
+                "5-methylcytidine antibody",
+                "MBD2 protein methyl-CpG binding domain",
+                "CAGE",
+                "RACE",
+                "MDA",
+                "padlock probes capture method",
+                "other",
+                "unspecified"
+            ],
+            "type": "string",
+            "title": "Library selection",
+            "default": "RANDOM",
+            "description": "Method the select the genomic molecules for sequencing"
+        },
+        "design_description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Description of the experimental design"
+        },
+        "instrument_model_id": {
+            "enum": [
+                "ABI_SOLID: AB 5500 Genetic Analyzer",
+                "ABI_SOLID: AB 5500xl Genetic Analyzer",
+                "ABI_SOLID: AB 5500xl-W Genetic Analysis System",
+                "ABI_SOLID: AB SOLiD 3 Plus System",
+                "ABI_SOLID: AB SOLiD 4 System",
+                "ABI_SOLID: AB SOLiD 4hq System",
+                "ABI_SOLID: AB SOLiD PI System",
+                "ABI_SOLID: AB SOLiD System 2.0",
+                "ABI_SOLID: AB SOLiD System 3.0",
+                "ABI_SOLID: AB SOLiD System",
+                "ABI_SOLID: unspecified",
+                "BGISEQ: BGISEQ-50",
+                "BGISEQ: BGISEQ-500",
+                "BGISEQ: MGISEQ-2000RS",
+                "CAPILLARY: AB 310 Genetic Analyzer",
+                "CAPILLARY: AB 3130 Genetic Analyzer",
+                "CAPILLARY: AB 3130xL Genetic Analyzer",
+                "CAPILLARY: AB 3500 Genetic Analyzer",
+                "CAPILLARY: AB 3500xL Genetic Analyzer",
+                "CAPILLARY: AB 3730 Genetic Analyzer",
+                "CAPILLARY: AB 3730xL Genetic Analyzer",
+                "CAPILLARY: unspecified",
+                "COMPLETE_GENOMICS: Complete Genomics",
+                "COMPLETE_GENOMICS: unspecified",
+                "DNBSEQ: DNBSEQ-G400 FAST",
+                "DNBSEQ: DNBSEQ-G400",
+                "DNBSEQ: DNBSEQ-G50",
+                "DNBSEQ: DNBSEQ-T7",
+                "DNBSEQ: unspecified",
+                "HELICOS: Helicos HeliScope",
+                "HELICOS: unspecified",
+                "ILLUMINA: HiSeq X Five",
+                "ILLUMINA: HiSeq X Ten",
+                "ILLUMINA: Illumina Genome Analyzer II",
+                "ILLUMINA: Illumina Genome Analyzer IIx",
+                "ILLUMINA: Illumina Genome Analyzer",
+                "ILLUMINA: Illumina HiScanSQ",
+                "ILLUMINA: Illumina HiSeq 1000",
+                "ILLUMINA: Illumina HiSeq 1500",
+                "ILLUMINA: Illumina HiSeq 2000",
+                "ILLUMINA: Illumina HiSeq 2500",
+                "ILLUMINA: Illumina HiSeq 3000",
+                "ILLUMINA: Illumina HiSeq 4000",
+                "ILLUMINA: Illumina HiSeq X",
+                "ILLUMINA: Illumina iSeq 100",
+                "ILLUMINA: Illumina MiniSeq",
+                "ILLUMINA: Illumina MiSeq",
+                "ILLUMINA: Illumina NovaSeq 6000",
+                "ILLUMINA: Illumina NovaSeq X Plus",
+                "ILLUMINA: Illumina NovaSeq X",
+                "ILLUMINA: NextSeq 1000",
+                "ILLUMINA: NextSeq 2000",
+                "ILLUMINA: NextSeq 500",
+                "ILLUMINA: NextSeq 550",
+                "ILLUMINA: unspecified",
+                "ION_TORRENT: Ion GeneStudio S5 Plus",
+                "ION_TORRENT: Ion GeneStudio S5 Prime",
+                "ION_TORRENT: Ion GeneStudio S5",
+                "ION_TORRENT: Ion Torrent Genexus",
+                "ION_TORRENT: Ion Torrent PGM",
+                "ION_TORRENT: Ion Torrent Proton",
+                "ION_TORRENT: Ion Torrent S5 XL",
+                "ION_TORRENT: Ion Torrent S5",
+                "ION_TORRENT: unspecified",
+                "LS454: 454 GS 20",
+                "LS454: 454 GS FLX Titanium",
+                "LS454: 454 GS FLX",
+                "LS454: 454 GS FLX+",
+                "LS454: 454 GS Junior",
+                "LS454: 454 GS",
+                "LS454: unspecified",
+                "OXFORD_NANOPORE: GridION",
+                "OXFORD_NANOPORE: MinION",
+                "OXFORD_NANOPORE: PromethION",
+                "OXFORD_NANOPORE: unspecified",
+                "PACBIO_SMRT: PacBio RS II",
+                "PACBIO_SMRT: PacBio RS",
+                "PACBIO_SMRT: Sequel II",
+                "PACBIO_SMRT: Sequel IIe",
+                "PACBIO_SMRT: Sequel",
+                "PACBIO_SMRT: unspecified"
+            ],
+            "type": "string",
+            "title": "Instrument",
+            "description": "Model of the instrument to perform the molecular analysis (sequencer)"
+        },
+        "paired_nominal_sdev": {
+            "type": "number",
+            "title": "Standard Deviation of paired read length",
+            "description": "The experiment paired nominal sdev"
+        },
+        "paired_nominal_length": {
+            "type": "number",
+            "title": "Length of paired reads",
+            "description": "The experiment paired nominal length"
+        },
+        "library_construction_protocol": {
+            "type": "string",
+            "title": "Library Construction Protocol",
+            "description": "The experiment library construction protocol"
         }
-      },
-      "title": "Extra Attributes",
-      "description": "Any extra attribute(s) to describe an experiment"
     },
-    "library_strategy": {
-      "enum": [
-        "AMPLICON",
-        "Bisulfite-Seq",
-        "ChIP-Seq",
-        "DNase-Hypersensitivity",
-        "MBD-Seq",
-        "OTHER",
-        "RNA-Seq",
-        "WCS",
-        "WGS",
-        "WXS"
-      ],
-      "type": "string",
-      "title": "Library strategy / scope",
-      "default": "WGS",
-      "descripion": "Scope of the sequencing library"
-    },
-    "library_selection": {
-      "enum": [
-        "ChIP",
-        "DNase",
-        "Hybrid Selection",
-        "PCR",
-        "RANDOM",
-        "cDNA",
-        "size fractionation",
-        "other",
-        "unspecified"
-      ],
-      "type": "string",
-      "title": "Library selection",
-      "default": "RANDOM",
-      "description": "Method the select the genomic molecules for sequencing"
-    },
-    "design_description": {
-      "type": "string",
-      "title": "Description",
-      "description": "Description of the experimental design"
-    },
-    "instrument_model_id": {
-      "enum": [
-        "ABI_SOLID: AB SOLiD 4 System",
-        "ABI_SOLID: AB SOLiD System 3.0",
-        "ABI_SOLID: unspecified",
-        "COMPLETE_GENOMICS: Complete Genomics",
-        "ILLUMINA: Illumina Genome Analyzer",
-        "ILLUMINA: Illumina Genome Analyzer II",
-        "ILLUMINA: Illumina Genome Analyzer IIx",
-        "ILLUMINA: Illumina HiSeq 2000",
-        "ILLUMINA: Illumina MiSeq",
-        "LS454: 454 GS FLX Titanium"
-      ],
-      "type": "string",
-      "title": "Instrument",
-      "description": "Model of the instrument to perform the molecular analysis (sequencer)"
-    },
-    "paired_nominal_sdev": {
-      "type": "number",
-      "title": "Standard Deviation of paired read length",
-      "description": "The experiment paired nominal sdev"
-    },
-    "paired_nominal_length": {
-      "type": "number",
-      "title": "Length of paired reads",
-      "description": "The experiment paired nominal length"
-    },
-    "library_construction_protocol": {
-      "type": "string",
-      "title": "Library Construction Protocol",
-      "description": "The experiment library construction protocol"
+    "x-resource": {
+        "schema": {
+            "fields": [
+                {
+                    "name": "title",
+                    "constraints": {
+                        "required": true
+                    }
+                },
+                {
+                    "name": "library_layout",
+                    "constraints": {
+                        "required": true
+                    }
+                },
+                {
+                    "name": "library_source",
+                    "constraints": {
+                        "required": true
+                    }
+                },
+                {
+                    "name": "library_strategy",
+                    "constraints": {
+                        "required": true
+                    }
+                },
+                {
+                    "name": "library_selection",
+                    "constraints": {
+                        "required": true
+                    }
+                },
+                {
+                    "name": "design_description",
+                    "constraints": {
+                        "required": true
+                    }
+                },
+                {
+                    "name": "instrument_model_id",
+                    "constraints": {
+                        "required": true
+                    }
+                }
+            ],
+            "primaryKey": [
+                "title"
+            ]
+        }
     }
-  },
-  "x-resource": {
-    "schema": {
-      "fields": [
-        { "name": "title", "constraints": { "required": true } },
-        { "name": "library_layout", "constraints": { "required": true } },
-        { "name": "library_source", "constraints": { "required": true } },
-        { "name": "library_strategy", "constraints": { "required": true } },
-        { "name": "library_selection", "constraints": { "required": true } },
-        { "name": "design_description", "constraints": { "required": true } },
-        { "name": "instrument_model_id", "constraints": { "required": true } }
-      ],
-      "primaryKey": ["title"]
-    }
-  }
 }

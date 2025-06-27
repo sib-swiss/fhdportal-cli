@@ -1,0 +1,31 @@
+{
+    "type": "object",
+    "title": "Policy",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "required": [
+        "title"
+    ],
+    "properties": {
+        "url": {
+            "type": "string",
+            "description": "URL of the Policy"
+        },
+        "title": {
+            "type": "string",
+            "description": "Name of the Policy"
+        },
+        "dac_id": {
+            "type": "string",
+            "format": "uuid"
+        },
+        "public_id": {
+            "type": "string",
+            "pattern": "^CHFEGAP[0-9]{11}",
+            "description": "Policy public_id"
+        },
+        "description": {
+            "type": "string",
+            "description": "The policy content"
+        }
+    }
+}

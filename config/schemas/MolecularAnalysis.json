@@ -1,206 +1,721 @@
 {
-  "type": "object",
-  "title": "MolecularAnalysis",
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "required": [
-    "title",
-    "description",
-    "analysis_type",
-    "sdafile_public_ids",
-    "experiment_types",
-    "genome_id",
-    "platform",
-    "molecularexperiment_public_ids",
-    "sample_public_ids"
-  ],
-  "properties": {
-    "title": {
-      "type": "string",
-      "description": "Title of the analysis"
-    },
-    "platform": {
-      "type": "string",
-      "description": "Name of the analysis platform"
-    },
-    "genome_id": {
-      "enum": [
-        "GRCh38.p14",
-        "GRCh38.p13",
-        "GRCh38.p12",
-        "GRCh38.p11",
-        "GRCh38.p10",
-        "GRCh38.p9",
-        "GRCh38.p8",
-        "GRCh38.p7",
-        "GRCh38.p6",
-        "GRCh38.p5",
-        "GRCh38.p4",
-        "GRCh38.p3",
-        "GRCh38.p2",
-        "GRCh38.p1",
-        "GRCh38",
-        "GRCh37.p13",
-        "GRCh37.p12",
-        "GRCh37.p11",
-        "GRCh37.p10",
-        "GRCh37.p9",
-        "GRCh37.p8",
-        "GRCh37.p7",
-        "GRCh37.p6",
-        "GRCh37.p5",
-        "GRCh37.p4",
-        "GRCh37.p3",
-        "GRCh37.p2",
-        "GRCh37.p1",
-        "GRCh37",
-        "NCBI36",
-        "NA19240_prelim_3.0",
-        "CHM1_1.1"
-      ],
-      "type": "string",
-      "description": "Genome version used in the analysis"
-    },
-    "public_id": {
-      "type": "string",
-      "pattern": "^CHFEGAZ[0-9]{11}",
-      "description": "Public ID of the analysis"
-    },
-    "chromosomes": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["id", "label"],
-        "properties": {
-          "id": {
-            "type": "number"
-          },
-          "label": {
-            "type": "string"
-          }
-        }
-      },
-      "description": "list of chromosomes analysed"
-    },
-    "description": {
-      "type": "string",
-      "description": "Description of the analysis"
-    },
-    "analysis_type": {
-      "enum": ["REFERENCE ALIGNMENT", "SAMPLE PHENOTYPE", "SEQUENCE VARIATION", "OTHER"],
-      "type": "string",
-      "description": "Type of analysis"
-    },
-    "experiment_types": {
-      "type": "array",
-      "items": {
-        "enum": [
-          "Whole genome sequencing",
-          "Exome sequencing",
-          "Transcriptomics",
-          "Genotyping by sequencing",
-          "Whole transcriptome sequencing",
-          "Genotyping by Array",
-          "Curation",
-          "Target sequencing"
-        ],
-        "type": "string"
-      },
-      "description": "Types of experiment"
-    },
-    "extra_attributes": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["tag", "value", "unit"],
-        "properties": {
-          "tag": {
-            "type": "string"
-          },
-          "unit": {
-            "type": "string"
-          },
-          "value": {
-            "type": "string"
-          }
-        }
-      },
-      "description": "Any extra attributes associated with the analysis"
-    },
-    "sdafile_public_ids": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "check": "SdaFile",
-        "pattern": "^CHFEGAF[0-9]{11}.*",
-        "check_title": "title",
-        "check_value": "public_id"
-      },
-      "description": "List of associated file public ids",
-      "uniqueItems": true
-    },
-    "sample_public_ids": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "check": "Sample",
-        "pattern": "^CHFEGAN[0-9]{11}.*",
-        "check_title": "title",
-        "check_value": "public_id"
-      },
-      "description": "List of associated sample public ids",
-      "uniqueItems": true
-    },
-    "molecularexperiment_public_ids": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "check": "MolecularExperiment",
-        "pattern": "^CHFEGAX[0-9]{11}.*",
-        "check_title": "properties.design_description",
-        "check_value": "public_id"
-      },
-      "description": "List of associated experiment public ids",
-      "uniqueItems": true
-    }
-  },
-  "x-resource": {
-    "schema": {
-      "fields": [
-        {
-          "name": "files",
-          "aliasOf": "sdafile_public_ids",
-          "type": "list",
-          "constraints": {
-            "required": true,
-            "jsonSchema": {
-              "type": "array",
-              "items": {
+    "type": "object",
+    "title": "AnalysisRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "required": [
+        "title",
+        "description",
+        "analysis_type",
+        "sdafile_public_ids",
+        "experiment_types",
+        "genome_id",
+        "platform",
+        "molecularexperiment_public_ids",
+        "sample_public_ids"
+    ],
+    "properties": {
+        "title": {
+            "type": "string",
+            "description": "Title of the analysis"
+        },
+        "platform": {
+            "type": "string",
+            "description": "Name of the analysis platform"
+        },
+        "genome_id": {
+            "enum": [
+                "NCBI36: GCF_000001405.12",
+                "GRCh37: GCA_000001405.1",
+                "GRCh37.p1: GCA_000001405.2",
+                "GRCh37.p2: GCA_000001405.3",
+                "GRCh37.p3: GCA_000001405.4",
+                "GRCh37.p4: GCA_000001405.5",
+                "GRCh37.p5: GCA_000001405.6",
+                "GRCh37.p6: GCA_000001405.7",
+                "GRCh37.p7: GCA_000001405.8",
+                "GRCh37.p8: GCA_000001405.9",
+                "GRCh37.p9: GCA_000001405.10",
+                "GRCh37.p10: GCA_000001405.11",
+                "GRCh37.p11: GCA_000001405.12",
+                "GRCh37.p12: GCA_000001405.13",
+                "GRCh37.p13: GCA_000001405.14",
+                "GRCh38: GCA_000001405.15",
+                "GRCh38.p2: GCA_000001405.17",
+                "GRCh38.p3: GCA_000001405.18",
+                "GRCh38.p4: GCA_000001405.19",
+                "GRCh38.p5: GCA_000001405.20",
+                "GRCh38.p6: GCA_000001405.21",
+                "GRCh38.p7: GCA_000001405.22",
+                "GRCh38.p8: GCA_000001405.23",
+                "GRCh38.p9: GCA_000001405.24",
+                "GRCh38.p10: GCA_000001405.25",
+                "GRCh38.p11: GCA_000001405.26",
+                "GRCh38.p12: GCA_000001405.27",
+                "GRCh38.p13: GCA_000001405.28",
+                "GRCh38.p14: GCA_000001405.29"
+            ],
+            "type": "string",
+            "description": "Genome version used in the analysis"
+        },
+        "public_id": {
+            "type": "string",
+            "pattern": "^CHFEGAZ[0-9]{11}",
+            "description": "Public ID of the analysis"
+        },
+        "chromosomes": {
+            "enum": [
+                {
+                    "id": 1,
+                    "name": "chr1",
+                    "accession": "NC_000001.9",
+                    "genome_group_id": 1
+                },
+                {
+                    "id": 2,
+                    "name": "chr2",
+                    "accession": "NC_000002.10",
+                    "genome_group_id": 1
+                },
+                {
+                    "id": 3,
+                    "name": "chr3",
+                    "accession": "NC_000003.10",
+                    "genome_group_id": 1
+                },
+                {
+                    "id": 4,
+                    "name": "chr4",
+                    "accession": "NC_000004.10",
+                    "genome_group_id": 1
+                },
+                {
+                    "id": 5,
+                    "name": "chr5",
+                    "accession": "NC_000005.8",
+                    "genome_group_id": 1
+                },
+                {
+                    "id": 6,
+                    "name": "chr6",
+                    "accession": "NC_000006.10",
+                    "genome_group_id": 1
+                },
+                {
+                    "id": 7,
+                    "name": "chr7",
+                    "accession": "NC_000007.12",
+                    "genome_group_id": 1
+                },
+                {
+                    "id": 8,
+                    "name": "chr8",
+                    "accession": "NC_000008.9",
+                    "genome_group_id": 1
+                },
+                {
+                    "id": 9,
+                    "name": "chr9",
+                    "accession": "NC_000009.10",
+                    "genome_group_id": 1
+                },
+                {
+                    "id": 10,
+                    "name": "chr10",
+                    "accession": "NC_000010.9",
+                    "genome_group_id": 1
+                },
+                {
+                    "id": 11,
+                    "name": "chr11",
+                    "accession": "NC_000011.8",
+                    "genome_group_id": 1
+                },
+                {
+                    "id": 12,
+                    "name": "chr12",
+                    "accession": "NC_000012.10",
+                    "genome_group_id": 1
+                },
+                {
+                    "id": 13,
+                    "name": "chr13",
+                    "accession": "NC_000013.9",
+                    "genome_group_id": 1
+                },
+                {
+                    "id": 14,
+                    "name": "chr14",
+                    "accession": "NC_000014.7",
+                    "genome_group_id": 1
+                },
+                {
+                    "id": 15,
+                    "name": "chr15",
+                    "accession": "NC_000015.8",
+                    "genome_group_id": 1
+                },
+                {
+                    "id": 16,
+                    "name": "chr16",
+                    "accession": "NC_000016.8",
+                    "genome_group_id": 1
+                },
+                {
+                    "id": 17,
+                    "name": "chr17",
+                    "accession": "NC_000017.9",
+                    "genome_group_id": 1
+                },
+                {
+                    "id": 18,
+                    "name": "chr18",
+                    "accession": "NC_000018.8",
+                    "genome_group_id": 1
+                },
+                {
+                    "id": 19,
+                    "name": "chr19",
+                    "accession": "NC_000019.8",
+                    "genome_group_id": 1
+                },
+                {
+                    "id": 20,
+                    "name": "chr20",
+                    "accession": "NC_000020.9",
+                    "genome_group_id": 1
+                },
+                {
+                    "id": 21,
+                    "name": "chr21",
+                    "accession": "NC_000021.7",
+                    "genome_group_id": 1
+                },
+                {
+                    "id": 22,
+                    "name": "chr22",
+                    "accession": "NC_000022.9",
+                    "genome_group_id": 1
+                },
+                {
+                    "id": 23,
+                    "name": "chrX",
+                    "accession": "NC_000023.9",
+                    "genome_group_id": 1
+                },
+                {
+                    "id": 24,
+                    "name": "chrY",
+                    "accession": "NC_000024.8",
+                    "genome_group_id": 1
+                },
+                {
+                    "id": 25,
+                    "name": "1",
+                    "accession": "CM000663.1",
+                    "genome_group_id": 2
+                },
+                {
+                    "id": 26,
+                    "name": "2",
+                    "accession": "CM000664.1",
+                    "genome_group_id": 2
+                },
+                {
+                    "id": 27,
+                    "name": "3",
+                    "accession": "CM000665.1",
+                    "genome_group_id": 2
+                },
+                {
+                    "id": 28,
+                    "name": "4",
+                    "accession": "CM000666.1",
+                    "genome_group_id": 2
+                },
+                {
+                    "id": 29,
+                    "name": "5",
+                    "accession": "CM000667.1",
+                    "genome_group_id": 2
+                },
+                {
+                    "id": 30,
+                    "name": "6",
+                    "accession": "CM000668.1",
+                    "genome_group_id": 2
+                },
+                {
+                    "id": 31,
+                    "name": "7",
+                    "accession": "CM000669.1",
+                    "genome_group_id": 2
+                },
+                {
+                    "id": 32,
+                    "name": "8",
+                    "accession": "CM000670.1",
+                    "genome_group_id": 2
+                },
+                {
+                    "id": 33,
+                    "name": "9",
+                    "accession": "CM000671.1",
+                    "genome_group_id": 2
+                },
+                {
+                    "id": 34,
+                    "name": "10",
+                    "accession": "CM000672.1",
+                    "genome_group_id": 2
+                },
+                {
+                    "id": 35,
+                    "name": "11",
+                    "accession": "CM000673.1",
+                    "genome_group_id": 2
+                },
+                {
+                    "id": 36,
+                    "name": "12",
+                    "accession": "CM000674.1",
+                    "genome_group_id": 2
+                },
+                {
+                    "id": 37,
+                    "name": "13",
+                    "accession": "CM000675.1",
+                    "genome_group_id": 2
+                },
+                {
+                    "id": 38,
+                    "name": "14",
+                    "accession": "CM000676.1",
+                    "genome_group_id": 2
+                },
+                {
+                    "id": 39,
+                    "name": "15",
+                    "accession": "CM000677.1",
+                    "genome_group_id": 2
+                },
+                {
+                    "id": 40,
+                    "name": "16",
+                    "accession": "CM000678.1",
+                    "genome_group_id": 2
+                },
+                {
+                    "id": 41,
+                    "name": "17",
+                    "accession": "CM000679.1",
+                    "genome_group_id": 2
+                },
+                {
+                    "id": 42,
+                    "name": "18",
+                    "accession": "CM000680.1",
+                    "genome_group_id": 2
+                },
+                {
+                    "id": 43,
+                    "name": "19",
+                    "accession": "CM000681.1",
+                    "genome_group_id": 2
+                },
+                {
+                    "id": 44,
+                    "name": "20",
+                    "accession": "CM000682.1",
+                    "genome_group_id": 2
+                },
+                {
+                    "id": 45,
+                    "name": "21",
+                    "accession": "CM000683.1",
+                    "genome_group_id": 2
+                },
+                {
+                    "id": 46,
+                    "name": "22",
+                    "accession": "CM000684.1",
+                    "genome_group_id": 2
+                },
+                {
+                    "id": 47,
+                    "name": "X",
+                    "accession": "CM000685.1",
+                    "genome_group_id": 2
+                },
+                {
+                    "id": 48,
+                    "name": "Y",
+                    "accession": "CM000686.1",
+                    "genome_group_id": 2
+                },
+                {
+                    "id": 49,
+                    "name": "MT",
+                    "accession": "J01415.2",
+                    "genome_group_id": 2
+                },
+                {
+                    "id": 50,
+                    "name": "chr1",
+                    "accession": "CM000663.2",
+                    "genome_group_id": 3
+                },
+                {
+                    "id": 51,
+                    "name": "chr2",
+                    "accession": "CM000664.2",
+                    "genome_group_id": 3
+                },
+                {
+                    "id": 52,
+                    "name": "chr3",
+                    "accession": "CM000665.2",
+                    "genome_group_id": 3
+                },
+                {
+                    "id": 53,
+                    "name": "chr4",
+                    "accession": "CM000666.2",
+                    "genome_group_id": 3
+                },
+                {
+                    "id": 54,
+                    "name": "chr5",
+                    "accession": "CM000667.2",
+                    "genome_group_id": 3
+                },
+                {
+                    "id": 55,
+                    "name": "chr6",
+                    "accession": "CM000668.2",
+                    "genome_group_id": 3
+                },
+                {
+                    "id": 56,
+                    "name": "chr7",
+                    "accession": "CM000669.2",
+                    "genome_group_id": 3
+                },
+                {
+                    "id": 57,
+                    "name": "chr8",
+                    "accession": "CM000670.2",
+                    "genome_group_id": 3
+                },
+                {
+                    "id": 58,
+                    "name": "chr9",
+                    "accession": "CM000671.2",
+                    "genome_group_id": 3
+                },
+                {
+                    "id": 59,
+                    "name": "chr10",
+                    "accession": "CM000672.2",
+                    "genome_group_id": 3
+                },
+                {
+                    "id": 60,
+                    "name": "chr11",
+                    "accession": "CM000673.2",
+                    "genome_group_id": 3
+                },
+                {
+                    "id": 61,
+                    "name": "chr12",
+                    "accession": "CM000674.2",
+                    "genome_group_id": 3
+                },
+                {
+                    "id": 62,
+                    "name": "chr13",
+                    "accession": "CM000675.2",
+                    "genome_group_id": 3
+                },
+                {
+                    "id": 63,
+                    "name": "chr14",
+                    "accession": "CM000676.2",
+                    "genome_group_id": 3
+                },
+                {
+                    "id": 64,
+                    "name": "chr15",
+                    "accession": "CM000677.2",
+                    "genome_group_id": 3
+                },
+                {
+                    "id": 65,
+                    "name": "chr16",
+                    "accession": "CM000678.2",
+                    "genome_group_id": 3
+                },
+                {
+                    "id": 66,
+                    "name": "chr17",
+                    "accession": "CM000679.2",
+                    "genome_group_id": 3
+                },
+                {
+                    "id": 67,
+                    "name": "chr18",
+                    "accession": "CM000680.2",
+                    "genome_group_id": 3
+                },
+                {
+                    "id": 68,
+                    "name": "chr19",
+                    "accession": "CM000681.2",
+                    "genome_group_id": 3
+                },
+                {
+                    "id": 69,
+                    "name": "chr20",
+                    "accession": "CM000682.2",
+                    "genome_group_id": 3
+                },
+                {
+                    "id": 70,
+                    "name": "chr21",
+                    "accession": "CM000683.2",
+                    "genome_group_id": 3
+                },
+                {
+                    "id": 71,
+                    "name": "chr22",
+                    "accession": "CM000684.2",
+                    "genome_group_id": 3
+                },
+                {
+                    "id": 72,
+                    "name": "chrX",
+                    "accession": "CM000685.2",
+                    "genome_group_id": 3
+                },
+                {
+                    "id": 73,
+                    "name": "chrY",
+                    "accession": "CM000686.2",
+                    "genome_group_id": 3
+                },
+                {
+                    "id": 74,
+                    "name": "chrM",
+                    "accession": "J01415.2",
+                    "genome_group_id": 3
+                }
+            ],
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "genome_group_id",
+                    "id",
+                    "name",
+                    "accession"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "number"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "accession": {
+                        "type": "string"
+                    },
+                    "genome_group_id": {
+                        "type": "number"
+                    }
+                }
+            },
+            "description": "list of chromosomes analysed"
+        },
+        "description": {
+            "type": "string",
+            "description": "Description of the analysis"
+        },
+        "analysis_type": {
+            "enum": [
+                "REFERENCE ALIGNMENT",
+                "SEQUENCE VARIATION",
+                "SAMPLE PHENOTYPE"
+            ],
+            "type": "string",
+            "description": "Type of analysis"
+        },
+        "experiment_types": {
+            "type": "array",
+            "items": {
+                "enum": [
+                    "Whole genome sequencing",
+                    "Exome sequencing",
+                    "Transcriptomics",
+                    "Genotyping by sequencing",
+                    "Whole transcriptome sequencing",
+                    "Genotyping by Array",
+                    "Curation",
+                    "Target sequencing"
+                ],
                 "type": "string"
-              },
-              "uniqueItems": true
-            }
-          }
+            },
+            "description": "Types of experiment"
         },
-        { "name": "title", "constraints": { "required": true } },
-        { "name": "platform", "constraints": { "required": true } },
-        { "name": "genome_id", "constraints": { "required": true } },
-        { "name": "description", "constraints": { "required": true } },
-        { "name": "analysis_type", "constraints": { "required": true } },
-        { "name": "experiment_types", "type": "list", "constraints": { "required": true } },
-        { "name": "samples", "type": "list" },
-        { "name": "experiments", "type": "list" }
-      ],
-      "primaryKey": ["title"],
-      "foreignKeys": [
-        {
-          "fields": ["samples"],
-          "reference": { "resource": "Sample", "fields": ["title"] }
+        "extra_attributes": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "tag",
+                    "value",
+                    "unit"
+                ],
+                "properties": {
+                    "tag": {
+                        "type": "string"
+                    },
+                    "unit": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "type": "string"
+                    }
+                }
+            },
+            "description": "Any extra attributes associated with the analysis"
         },
-        {
-          "fields": ["experiments"],
-          "reference": { "resource": "MolecularExperiment", "fields": ["title"] }
+        "sample_public_ids": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "pattern": "^CHFEGAN[0-9]{11}.*",
+                "x-check": "Sample",
+                "x-check_title": "title",
+                "x-check_value": "public_id"
+            },
+            "description": "List of associated sample public ids",
+            "uniqueItems": true
+        },
+        "sdafile_public_ids": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "pattern": "^CHFEGAF[0-9]{11}.*",
+                "x-check": "SdaFile",
+                "x-check_title": "title",
+                "x-check_value": "public_id"
+            },
+            "description": "List of associated file public ids",
+            "uniqueItems": true
+        },
+        "molecularexperiment_public_ids": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "pattern": "^CHFEGAX[0-9]{11}.*",
+                "x-check": "MolecularExperiment",
+                "x-check_title": "properties.design_description",
+                "x-check_value": "public_id"
+            },
+            "description": "List of associated experiment public ids",
+            "uniqueItems": true
         }
-      ]
+    },
+    "x-resource": {
+        "schema": {
+            "fields": [
+                {
+                    "name": "files",
+                    "type": "list",
+                    "aliasOf": "sdafile_public_ids",
+                    "constraints": {
+                        "required": true,
+                        "jsonSchema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            },
+                            "uniqueItems": true
+                        }
+                    }
+                },
+                {
+                    "name": "title",
+                    "constraints": {
+                        "required": true
+                    }
+                },
+                {
+                    "name": "platform",
+                    "constraints": {
+                        "required": true
+                    }
+                },
+                {
+                    "name": "genome_id",
+                    "constraints": {
+                        "required": true
+                    }
+                },
+                {
+                    "name": "description",
+                    "constraints": {
+                        "required": true
+                    }
+                },
+                {
+                    "name": "analysis_type",
+                    "constraints": {
+                        "required": true
+                    }
+                },
+                {
+                    "name": "experiment_types",
+                    "type": "list",
+                    "constraints": {
+                        "required": true
+                    }
+                },
+                {
+                    "name": "samples",
+                    "type": "list"
+                },
+                {
+                    "name": "experiments",
+                    "type": "list"
+                }
+            ],
+            "primaryKey": [
+                "title"
+            ],
+            "foreignKeys": [
+                {
+                    "fields": [
+                        "samples"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "title"
+                        ],
+                        "resource": "Sample"
+                    }
+                },
+                {
+                    "fields": [
+                        "experiments"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "title"
+                        ],
+                        "resource": "MolecularExperiment"
+                    }
+                }
+            ]
+        }
     }
-  }
 }

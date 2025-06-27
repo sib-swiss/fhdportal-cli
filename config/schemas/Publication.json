@@ -1,31 +1,35 @@
 {
-  "$id": "https://fega.swiss/publication.schema.json",
-  "type": "object",
-  "title": "Publication",
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "required": ["id", "title", "doi"],
-  "properties": {
-    "id": {
-      "type": "number",
-      "description": "Pubmed ID of the publication"
+    "$id": "https://fega.swiss/publication.schema.json",
+    "type": "object",
+    "title": "Publication",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "required": [
+        "id",
+        "title",
+        "doi"
+    ],
+    "properties": {
+        "id": {
+            "type": "number",
+            "description": "Pubmed ID of the publication"
+        },
+        "doi": {
+            "type": "string",
+            "description": "DOI of the publication"
+        },
+        "date": {
+            "type": "string",
+            "format": "date",
+            "description": "publication date"
+        },
+        "title": {
+            "type": "string",
+            "description": "Title of the publication"
+        },
+        "journal": {
+            "type": "string",
+            "description": "Name of the journal"
+        }
     },
-    "doi": {
-      "type": "string",
-      "description": "DOI of the publication"
-    },
-    "date": {
-      "type": "string",
-      "format": "date",
-      "description": "publication date"
-    },
-    "title": {
-      "type": "string",
-      "description": "Title of the publication"
-    },
-    "journal": {
-      "type": "string",
-      "description": "Name of the journal"
-    }
-  },
-  "description": "A publication"
+    "description": "A publication"
 }

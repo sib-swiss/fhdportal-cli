@@ -1,123 +1,163 @@
 {
-  "type": "object",
-  "title": "MolecularRun",
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "required": ["title", "run_file_type", "sdafile_public_ids", "molecularexperiment_public_id", "sample_public_id"],
-  "properties": {
-    "title": {
-      "type": "string",
-      "title": "title",
-      "description": "Title of the Run"
-    },
-    "public_id": {
-      "type": "string",
-      "title": "Public ID",
-      "pattern": "^CHFEGAR[0-9]{11}.*",
-      "description": "public ID of the Run"
-    },
-    "run_file_type": {
-      "enum": [
-        "bam",
-        "CompleteGenomics_native",
-        "cram",
-        "fastq",
-        "Illumina_native",
-        "Illumina_native_qseq",
-        "OxfordNanopore_native",
-        "PacBio_HDF5",
-        "sff",
-        "SOLiD_native_csfasta",
-        "srf"
-      ],
-      "type": "string",
-      "title": "Run File type",
-      "description": "Output file type of the Run"
-    },
-    "extra_attributes": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["tag", "value"],
-        "properties": {
-          "tag": {
-            "type": "string"
-          },
-          "unit": {
-            "type": "string"
-          },
-          "value": {
-            "type": "string"
-          }
-        }
-      },
-      "description": "Any extra attributes that describes the Run"
-    },
-    "sdafile_public_ids": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "check": "SdaFile",
-        "pattern": "^CHFEGAF[0-9]{11}.*",
-        "check_title": "title",
-        "check_value": "public_id"
-      },
-      "title": "File",
-      "description": "List of associated file public ids",
-      "uniqueItems": true
-    },
-    "sample_public_id": {
-      "type": "string",
-      "check": "Sample",
-      "title": "Sample",
-      "pattern": "^CHFEGAN[0-9]{11}.*",
-      "check_title": "title",
-      "check_value": "public_id",
-      "description": "Public ID of associated molecular sample"
-    },
-    "molecularexperiment_public_id": {
-      "type": "string",
-      "check": "MolecularExperiment",
-      "title": "Experiment",
-      "pattern": "^CHFEGAX[0-9]{11}.*",
-      "check_title": "properties.title",
-      "check_value": "public_id",
-      "description": "Public ID of associated molecular experiment"
-    }
-  },
-  "x-resource": {
-    "schema": {
-      "fields": [
-        { "name": "title", "constraints": { "required": true } },
-        { "name": "experiment" },
-        { "name": "sample" },
-        {
-          "name": "files",
-          "aliasOf": "sdafile_public_ids",
-          "type": "list",
-          "constraints": {
-            "required": true,
-            "jsonSchema": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "uniqueItems": true
-            }
-          }
+    "type": "object",
+    "title": "RunRequest",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "required": [
+        "title",
+        "run_file_type",
+        "sdafile_public_ids",
+        "molecularexperiment_public_id",
+        "sample_public_id"
+    ],
+    "properties": {
+        "title": {
+            "type": "string",
+            "title": "title",
+            "description": "Title of the Run"
         },
-        { "name": "file_type", "aliasOf": "run_file_type", "constraints": { "required": true } }
-      ],
-      "primaryKey": ["title"],
-      "foreignKeys": [
-        {
-          "fields": ["experiment"],
-          "reference": { "resource": "MolecularExperiment", "fields": ["title"] }
+        "public_id": {
+            "type": "string",
+            "title": "Public ID",
+            "pattern": "^CHFEGAR[0-9]{11}.*",
+            "description": "public ID of the Run"
         },
-        {
-          "fields": ["sample"],
-          "reference": { "resource": "Sample", "fields": ["title"] }
+        "run_file_type": {
+            "enum": [
+                "fastq",
+                "bam",
+                "cram",
+                "srf",
+                "sff",
+                "Illumina_native",
+                "Illumina_native_qseq",
+                "SOLiD_native_csfasta",
+                "PacBio_HDF5",
+                "CompleteGenomics_native",
+                "OxfordNanopore_native"
+            ],
+            "type": "string",
+            "title": "Run File type",
+            "description": "Output file type of the Run"
+        },
+        "extra_attributes": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "tag",
+                    "value"
+                ],
+                "properties": {
+                    "tag": {
+                        "type": "string"
+                    },
+                    "unit": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "type": "string"
+                    }
+                }
+            },
+            "description": "Any extra attributes that describes the Run"
+        },
+        "sample_public_id": {
+            "type": "string",
+            "title": "Sample",
+            "pattern": "^CHFEGAN[0-9]{11}.*",
+            "x-check": "Sample",
+            "description": "Public ID of associated sample",
+            "x-check_title": "title",
+            "x-check_value": "public_id"
+        },
+        "sdafile_public_ids": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "pattern": "^CHFEGAF[0-9]{11}.*",
+                "x-check": "SdaFile",
+                "x-check_title": "title",
+                "x-check_value": "public_id"
+            },
+            "title": "File",
+            "description": "List of associated file public ids",
+            "uniqueItems": true
+        },
+        "molecularexperiment_public_id": {
+            "type": "string",
+            "title": "Experiment",
+            "pattern": "^CHFEGAX[0-9]{11}.*",
+            "x-check": "MolecularExperiment",
+            "description": "Public ID of associated molecular experiment",
+            "x-check_title": "properties.title",
+            "x-check_value": "public_id"
         }
-      ]
+    },
+    "x-resource": {
+        "schema": {
+            "fields": [
+                {
+                    "name": "title",
+                    "constraints": {
+                        "required": true
+                    }
+                },
+                {
+                    "name": "experiment"
+                },
+                {
+                    "name": "sample"
+                },
+                {
+                    "name": "files",
+                    "type": "list",
+                    "aliasOf": "sdafile_public_ids",
+                    "constraints": {
+                        "required": true,
+                        "jsonSchema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            },
+                            "uniqueItems": true
+                        }
+                    }
+                },
+                {
+                    "name": "file_type",
+                    "aliasOf": "run_file_type",
+                    "constraints": {
+                        "required": true
+                    }
+                }
+            ],
+            "primaryKey": [
+                "title"
+            ],
+            "foreignKeys": [
+                {
+                    "fields": [
+                        "experiment"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "title"
+                        ],
+                        "resource": "MolecularExperiment"
+                    }
+                },
+                {
+                    "fields": [
+                        "sample"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "title"
+                        ],
+                        "resource": "Sample"
+                    }
+                }
+            ]
+        }
     }
-  }
 }

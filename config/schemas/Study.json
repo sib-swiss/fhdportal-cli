@@ -1,82 +1,187 @@
 {
-  "type": "object",
-  "title": "Study",
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "required": ["title", "study_type"],
-  "properties": {
-    "title": {
-      "type": "string",
-      "minLength": 3
-    },
-    "public_id": {
-      "type": "string",
-      "pattern": "^CHFEGAS[0-9]{11}.*",
-      "description": "Public identifier of the study"
-    },
-    "pubmed_ids": {
-      "type": "array",
-      "items": {
-        "type": "number",
-        "check": "pubmed_id"
-      },
-      "uniqueItems": true
-    },
-    "study_type": {
-      "type": "string",
-      "minLength": 3
-    },
-    "custom_tags": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "description": {
-      "type": "string"
-    },
-    "repositories": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "url": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "repository_id": {
-            "type": "string"
-          }
+    "type": "object",
+    "title": "StudyRequest",
+    "x-cega": {
+        "schema": {
+            "foreignKeys": [
+                {
+                    "fields": [
+                        "title"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "title"
+                        ],
+                        "resource": "studies"
+                    }
+                },
+                {
+                    "fields": [
+                        "description"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "description"
+                        ],
+                        "resource": "studies"
+                    }
+                },
+                {
+                    "fields": [
+                        "study_type"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "study_type"
+                        ],
+                        "resource": "studies"
+                    }
+                },
+                {
+                    "fields": [
+                        "pubmed_ids"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "pubmed_ids"
+                        ],
+                        "resource": "studies"
+                    }
+                },
+                {
+                    "fields": [
+                        "custom_tags"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "custom_tags"
+                        ],
+                        "resource": "studies"
+                    }
+                },
+                {
+                    "fields": [
+                        "extra_attributes"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "extra_attributes"
+                        ],
+                        "resource": "studies"
+                    }
+                }
+            ]
         }
-      }
     },
-    "extra_attributes": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "tag": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "required": [
+        "title",
+        "study_type"
+    ],
+    "properties": {
+        "title": {
+            "type": "string",
+            "minLength": 3
+        },
+        "public_id": {
+            "type": "string",
+            "pattern": "^CHFEGAS[0-9]{11}.*",
+            "description": "Public identifier of the study"
+        },
+        "pubmed_ids": {
+            "type": "array",
+            "items": {
+                "type": "number",
+                "x-check": "pubmed_id"
+            },
+            "uniqueItems": true
+        },
+        "study_type": {
+            "enum": [
+                "Whole Genome Sequencing",
+                "Metagenomics",
+                "Transcriptome Analysis",
+                "Resequencing",
+                "Epigenetics",
+                "Synthetic Genomics",
+                "Forensic or Paleo-genomics",
+                "Gene Regulation Study",
+                "Cancer Genomics",
+                "Population Genomics",
+                "RNASeq",
+                "Exome Sequencing",
+                "Pooled Clone Sequencing",
+                "Transcriptome Sequencing"
+            ],
             "type": "string"
-          },
-          "unit": {
+        },
+        "custom_tags": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "description": {
             "type": "string"
-          },
-          "value": {
-            "type": "string"
-          }
+        },
+        "repositories": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "repository_id": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "extra_attributes": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "tag": {
+                        "type": "string"
+                    },
+                    "unit": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "type": "string"
+                    }
+                }
+            }
         }
-      }
+    },
+    "x-resource": {
+        "schema": {
+            "fields": [
+                {
+                    "name": "title",
+                    "constraints": {
+                        "required": true
+                    }
+                },
+                {
+                    "name": "type",
+                    "aliasOf": "study_type",
+                    "constraints": {
+                        "required": true
+                    }
+                },
+                {
+                    "name": "description"
+                }
+            ],
+            "primaryKey": [
+                "title"
+            ]
+        }
     }
-  },
-  "x-resource": {
-    "schema": {
-      "fields": [
-        { "name": "title", "constraints": { "required": true } },
-        { "name": "type", "aliasOf": "study_type", "constraints": { "required": true } },
-        { "name": "description" }
-      ],
-      "primaryKey": ["title"]
-    }
-  }
 }
