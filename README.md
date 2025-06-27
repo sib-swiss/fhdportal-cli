@@ -1,21 +1,23 @@
-# FEGA CLI
+# FHDportal CLI
 
-A command-line interface tool for working with Federated European Genome-phenome Archive (FEGA) submission bundles and metadata validation.
-
-## About FEGA
-
-The **Federated European Genome-phenome Archive (FEGA)** is the primary global resource for discovery and access of sensitive human omics and associated data consented for secondary use, through a network of national human data repositories to accelerate disease research and improve human health.
-
-FEGA collaborates with European and global initiatives including [GA4GH](https://www.ga4gh.org/how-we-work/driver-projects/), [ELIXIR](https://elixir-europe.org/), [1+ Million Genomes Framework](https://framework.onemilliongenomes.eu/), and [GDI](https://gdi.onemilliongenomes.eu/). By providing a solution to emerging challenges around secure and efficient management of human omics and associated data, the FEGA Network fosters data reuse, enables reproducibility, and accelerates biomedical research.
-
-For more information about FEGA, visit: https://ega-archive.org/about/projects-and-funders/federated-ega/
+A command-line interface tool for working with FHDportal submission bundles and metadata validation. FHDportal is a submission platform for the Federated European Genome-phenome Archive (FEGA), developed by the SIB Swiss Institute of Bioinformatics.
 
 ## Installation
 
 ### Prerequisites
 
 - PHP 8.2 or higher
-- Composer
+- Composer 2.8 or higher
+
+#### Installing Composer
+
+If Composer is not already installed on your system, follow the [official Composer installation guide](https://getcomposer.org/download/) to set it up globally.
+
+After installation, verify Composer is available by running:
+
+```bash
+composer --version
+```
 
 ### Setup
 
@@ -40,36 +42,138 @@ chmod +x bin/console
 
 ## Usage
 
-The FEGA CLI provides four main commands for working with FEGA submission bundles:
+The FHDportal CLI provides four main commands for working with FHDportal submission bundles:
 
 ```bash
-./bin/console <command> [options] [arguments]
+bin/console <command> [options] [arguments]
 ```
 
 ### Available Commands
 
-- [`bundle`](#bundle-command) - Generate a manifest file for a FEGA submission bundle
+- [`update`](#update-command) - Update local JSON schemas
 - [`template`](#template-command) - Generate TSV file templates for metadata
-- [`update`](#update-command) - Update local JSON schemas from the FEGA API
-- [`validate`](#validate-command) - Validate FEGA metadata files and submission bundles
+- [`bundle`](#bundle-command) - Generate a manifest file for a submission bundle
+- [`validate`](#validate-command) - Validate metadata files and submission bundles
 
----
+## Quick Start Guide
 
-## Bundle Command
+This guide will walk you through creating your first submission bundle from start to finish.
 
-Generate a manifest file for a FEGA submission bundle.
+### Step 1: Update JSON Schemas
 
-### Syntax
+First, ensure you have the latest validation schemas:
 
 ```bash
-./bin/console bundle [options] <directory-path>
+bin/console update -v
 ```
 
-### Arguments
+This downloads the current schema definitions from FHDportal and saves them to `config/schemas/`.
+
+### Step 2: Generate File Templates
+
+Create template files to help structure your metadata:
+
+```bash
+bin/console template -o my-genomic-study.zip -v
+```
+
+Extract the templates to your working directory:
+
+```bash
+unzip my-genomic-study.zip
+```
+
+You will now have template files like:
+
+- `studies.tsv`
+- `samples.tsv`
+- `molecular_experiments.tsv`
+- `molecular_runs.tsv`
+- `molecular_analyses.tsv`
+- `datasets.tsv`
+
+### Step 3: Add Your Data
+
+Edit the TSV files with your metadata. For example, in `studies.tsv`:
+
+```tsv
+title	description	type
+My Genomic Study	A comprehensive genomic analysis	Cancer Genomics
+```
+
+### Step 4: Create a Submission Bundle
+
+Generate a manifest file and optionally create an archive:
+
+```bash
+bin/console bundle -a -o my-genomic-study.zip -v .
+```
+
+This creates:
+
+- `manifest.yaml` - Maps your files to FHDportal resource types
+- `my-genomic-study.zip` - Complete submission archive
+
+### Step 5: Validate Your Bundle
+
+Check that your submission bundle is valid:
+
+```bash
+bin/console validate -v my-submission-bundle.zip
+```
+
+If validation passes, you'll see:
+
+```
+[OK] All resources validated successfully
+```
+
+If there are errors, fix them and run the validation again until successful.
+
+### Complete Example Workflow
+
+Here is the full sequence of commands:
+
+```bash
+# 1. Update schemas
+bin/console update
+
+# 2. Set up your project
+mkdir my-genomic-study
+cd my-genomic-study
+
+# 3. Generate templates
+bin/console template -o templates.zip
+unzip templates.zip
+rm templates.zip
+
+# 4. Edit your TSV files with metadata
+# (Populate the data programmatically or use your preferred spreadsheet application)
+
+# 5. Create the bundle
+.bin/console bundle -a -o my-genomic-study.zip .
+
+# 6. Validate before submission
+.bin/console validate my-genomic-study.zip
+```
+
+## Commands
+
+### Bundle Command
+
+Generate a manifest file for an FHDportal submission bundle.
+
+#### Syntax
+
+```bash
+bin/console bundle [options] <directory-path>
+```
+
+#### Arguments
 
 - `directory-path` **(required)** - Directory containing files to bundle
 
-### Options
+#### Options
 
 - `-a, --create-archive` - Create a ZIP archive of the bundle
 - `-o, --output-file=OUTPUT-FILE` - Output file path for the archive
@@ -77,167 +181,163 @@ Generate a manifest file for a FEGA submission bundle.
 - `-v, --verbose` - Increase verbosity of messages
 - `-h, --help` - Display help for the command
 
-### Description
+#### Description
 
-The `bundle` command scans a directory containing FEGA metadata files and generates a `manifest.yaml` file that describes the contents of the submission bundle. The manifest maps each file to its corresponding FEGA resource type based on the filename.
+The `bundle` command scans a directory containing metadata files and generates a `manifest.yaml` file that describes the contents of the submission bundle. The manifest maps each file to its corresponding resource type based on the filename.
 
 **Supported resource types:**
 
-- `Dataset` (datasets.tsv)
-- `File` (files.tsv)
-- `MolecularAnalysis` (molecularanalyses.tsv)
-- `MolecularExperiment` (molecularexperiments.tsv)
-- `MolecularRun` (molecularruns.tsv)
-- `Sample` (samples.tsv)
-- `Publication` (publications.tsv)
-- `SdaFile` (sdafiles.tsv)
 - `Study` (studies.tsv)
-- `Submission` (submissions.tsv)
+- `Sample` (samples.tsv)
+- `MolecularExperiment` (molecular_experiments.tsv)
+- `MolecularRun` (molecular_runs.tsv)
+- `MolecularAnalysis` (molecular_analyses.tsv)
+- `Dataset` (datasets.tsv)
 
-### Examples
+#### Examples
 
 **Basic usage:**
 
 ```bash
-./bin/console bundle /path/to/submission/data
+bin/console bundle /path/to/submission/data
 ```
 
 **Create a bundle with archive:**
 
 ```bash
-./bin/console bundle -a /path/to/submission/data
+bin/console bundle -a /path/to/submission/data
 ```
 
 **Specify custom archive name:**
 
 ```bash
-./bin/console bundle -a -o my-submission.zip /path/to/submission/data
+bin/console bundle -a -o my-submission.zip /path/to/submission/data
 ```
 
 **Overwrite existing manifest:**
 
 ```bash
-./bin/console bundle -w /path/to/submission/data
+bin/console bundle -w /path/to/submission/data
 ```
 
 **Verbose output:**
 
 ```bash
-./bin/console bundle -v -a /path/to/submission/data
+bin/console bundle -v -a /path/to/submission/data
 ```
 
 ---
 
-## Template Command
+### Template Command
 
-Generate TSV file templates for FEGA metadata submission.
+Generate TSV file templates for metadata submission.
 
-### Syntax
+#### Syntax
 
 ```bash
-./bin/console template [options]
+bin/console template [options]
 ```
 
-### Options
+#### Options
 
 - `-o, --output-file=OUTPUT-FILE` - Output file path for the archive (default: `templates.zip`)
 - `-v, --verbose` - Increase verbosity of messages
 - `-h, --help` - Display help for the command
 
-### Description
+#### Description
 
-The `template` command generates TSV (Tab-Separated Values) file templates for all available FEGA resource types. These templates contain the correct column headers based on the current JSON schemas, making it easier to prepare metadata files for submission.
+The `template` command generates TSV (Tab-Separated Values) file templates for all available FHDportal resource types. These templates contain the correct column headers based on the current JSON schemas, making it easier to prepare metadata files for submission.
 
 The templates are created based on the table schemas retrieved from the local JSON schema files. Each template file is named using the pluralized, snake_case version of the resource type (e.g., `molecular_analyses.tsv` for `MolecularAnalysis`).
 
-### Examples
+#### Examples
 
 **Generate templates with default filename:**
 
 ```bash
-./bin/console template
+bin/console template
 ```
 
 **Specify custom output file:**
 
 ```bash
-./bin/console template -o my-templates.zip
+bin/console template -o my-templates.zip
 ```
 
 **Verbose output:**
 
 ```bash
-./bin/console template -v
+bin/console template -v
 ```
 
 ---
 
-## Update Command
+### Update Command
 
-Update the local JSON schemas from the FEGA API.
+Update the local JSON schemas.
 
-### Syntax
+#### Syntax
 
 ```bash
-./bin/console update [options]
+bin/console update [options]
 ```
 
-### Options
+#### Options
 
 - `-v, --verbose` - Increase verbosity of messages
 - `-h, --help` - Display help for the command
 
-### Description
+#### Description
 
-The `update` command fetches the latest JSON schemas from the FEGA API and updates the local schema files in the `config/schemas/` directory. This ensures that validation and template generation use the most current schema definitions.
+The `update` command fetches the latest JSON schemas from the FHDportal and updates the local schema files in the `config/schemas/` directory. This ensures that validation and template generation use the most current schema definitions.
 
 The command performs the following operations:
 
-1. Fetches schemas from the FEGA API endpoint
+1. Fetches schemas from the FHDportal API endpoint
 2. Deletes existing local schema files
 3. Creates new schema files with the updated definitions
 4. Formats the JSON content for readability
 
-### Examples
+#### Examples
 
 **Update schemas:**
 
 ```bash
-./bin/console update
+bin/console update
 ```
 
 **Update with verbose output:**
 
 ```bash
-./bin/console update -v
+bin/console update -v
 ```
 
 ---
 
-## Validate Command
+### Validate Command
 
-Validate FEGA metadata files and submission bundles.
+Validate metadata files and submission bundles.
 
-### Syntax
+#### Syntax
 
 ```bash
-./bin/console validate [options] <target-path>
+bin/console validate [options] <target-path>
 ```
 
-### Arguments
+#### Arguments
 
 - `target-path` **(required)** - File or directory path to validate
 
-### Options
+#### Options
 
 - `-t, --resource-type=RESOURCE-TYPE` - Type of the resource (default: `SubmissionBundle`)
 - `-f, --output-format=OUTPUT-FORMAT` - Output format: `json` or `text` (default: `text`)
 - `-v, --verbose` - Increase verbosity of messages
 - `-h, --help` - Display help for the command
 
-### Description
+#### Description
 
-The `validate` command performs comprehensive validation of FEGA metadata files and submission bundles against the JSON schemas. It supports various input formats and provides detailed error reporting.
+The `validate` command performs comprehensive validation of FHDportal metadata files and submission bundles against the JSON schemas. It supports various input formats and provides detailed error reporting.
 
 **Supported input types:**
 
@@ -248,61 +348,57 @@ The `validate` command performs comprehensive validation of FEGA metadata files 
 
 **Validation features:**
 
-- Schema validation against FEGA JSON schemas
+- Schema validation against FHDportal JSON schemas
 - Manifest file validation
 - Cross-referential integrity checks
 - Detailed error reporting with line numbers
 - Error grouping for similar issues
 
-### Examples
+#### Examples
 
 **Validate a submission bundle directory:**
 
 ```bash
-./bin/console validate /path/to/submission/bundle
+bin/console validate /path/to/submission/bundle
 ```
 
 **Validate a ZIP archive:**
 
 ```bash
-./bin/console validate submission-bundle.zip
+bin/console validate submission-bundle.zip
 ```
 
 **Validate a TSV file with specific resource type:**
 
 ```bash
-./bin/console validate -t Dataset datasets.tsv
+bin/console validate -t Dataset datasets.tsv
 ```
 
 **Validate with JSON output:**
 
 ```bash
-./bin/console validate -f json /path/to/bundle
+bin/console validate -f json /path/to/bundle
 ```
 
 **Validate with verbose output:**
 
 ```bash
-./bin/console validate -v /path/to/bundle
+bin/console validate -v /path/to/bundle
 ```
 
-### Resource Types
+#### Resource Types
 
 The following resource types are supported for validation:
 
-- `Dataset`
-- `File`
-- `MolecularAnalysis`
+- `SubmissionBundle` (default)
+- `Study`
+- `Sample`
 - `MolecularExperiment`
 - `MolecularRun`
-- `Publication`
-- `Sample`
-- `SdaFile`
-- `Study`
-- `Submission`
-- `SubmissionBundle` (default)
+- `MolecularAnalysis`
+- `Dataset`
 
-### Output Formats
+#### Output Formats
 
 **Text Format (default):**
 
@@ -319,41 +415,25 @@ The following resource types are supported for validation:
 
 ---
 
-## Configuration
-
-The CLI tool uses configuration files located in the `config/` directory:
-
-- `config/schemas/` - JSON schema files for validation
-- `config/services.yaml` - Service configuration
-- `config/packages/` - Framework configuration
-
-## Error Handling
-
-The CLI provides comprehensive error handling and reporting:
-
-- **Validation errors** are grouped by similarity and displayed with line numbers
-- **File errors** include specific details about missing or malformed files
-- **Schema errors** highlight specific validation rule violations
-- **System errors** provide clear guidance for resolution
-
-## Exit Codes
-
-- `0` - Success
-- `1` - General failure
-- `2` - Invalid arguments or options
-
 ## Development
 
 ### Requirements
 
 - PHP 8.2+
 - Symfony 7.2+
-- Composer
+- Composer 2.8+
 
 ### Key Dependencies
 
-- `symfony/console` - Command-line interface framework
-- `symfony/validator` - Data validation
 - `opis/json-schema` - JSON schema validation
-- `symfony/yaml` - YAML file processing
+- `symfony/console` - Command-line interface framework
 - `symfony/http-client` - HTTP API communication
+- `symfony/yaml` - YAML file processing
+
+### Configuration
+
+The CLI tool uses configuration files located in the `config/` directory:
+
+- `config/schemas/` - JSON schema files for validation
+- `config/packages/` - Framework configuration
+- `config/services.yaml` - Service configuration
