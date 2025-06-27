@@ -1,0 +1,82 @@
+{
+  "type": "object",
+  "title": "Study",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "required": ["title", "study_type"],
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 3
+    },
+    "public_id": {
+      "type": "string",
+      "pattern": "^CHFEGAS[0-9]{11}.*",
+      "description": "Public identifier of the study"
+    },
+    "pubmed_ids": {
+      "type": "array",
+      "items": {
+        "type": "number",
+        "check": "pubmed_id"
+      },
+      "uniqueItems": true
+    },
+    "study_type": {
+      "type": "string",
+      "minLength": 3
+    },
+    "custom_tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "description": {
+      "type": "string"
+    },
+    "repositories": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "repository_id": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "extra_attributes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "tag": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "x-resource": {
+    "schema": {
+      "fields": [
+        { "name": "title", "constraints": { "required": true } },
+        { "name": "type", "aliasOf": "study_type", "constraints": { "required": true } },
+        { "name": "description" }
+      ],
+      "primaryKey": ["title"]
+    }
+  }
+}

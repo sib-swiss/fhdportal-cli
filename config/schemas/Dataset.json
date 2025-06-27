@@ -1,0 +1,99 @@
+{
+  "type": "object",
+  "title": "Dataset",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "required": ["title", "description", "dataset_types", "run_public_ids"],
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "public_id": {
+      "type": "string",
+      "pattern": "^CHFEGAD[0-9]{11}"
+    },
+    "description": {
+      "type": "string"
+    },
+    "dataset_types": {
+      "type": "array",
+      "check": "verticalcheckbox",
+      "items": {
+        "enum": [
+          "Whole genome sequencing",
+          "Genotyping by array",
+          "Transcripome profiling by array",
+          "Methylation binding domain sequencing",
+          "Phenotype information",
+          "Genomic variant calling",
+          "Histone methylation profiling by high-throughput sequencing",
+          "Exome sequencing",
+          "Transcriptome profiling by high-throughput sequencing",
+          "Amplicon sequencing",
+          "Methylation profiling by high-throughput sequencing",
+          "Study summary information",
+          "Chromatin accessibility profiling by high-throughput sequencing",
+          "Chip-Seq"
+        ],
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "run_public_ids": {
+      "type": "array",
+      "check": "MolecularRuns",
+      "items": {
+        "type": "string",
+        "pattern": "^CHFEGAR[0-9]{11}"
+      },
+      "uniqueItems": true
+    },
+    "extra_attributes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["tag", "value", "unit"],
+        "properties": {
+          "tag": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "analysis_public_ids": {
+      "type": "array",
+      "check": "MolecularAnalysis",
+      "items": {
+        "type": "string",
+        "pattern": "^CHFEGAZ[0-9]{11}"
+      },
+      "check_title": "title",
+      "check_value": "public_id",
+      "uniqueItems": true
+    }
+  },
+  "x-resource": {
+    "schema": {
+      "fields": [
+        { "name": "title", "constraints": { "required": true } },
+        { "name": "description", "constraints": { "required": true } },
+        { "name": "dataset_types", "type": "list", "constraints": { "required": true } },
+        { "name": "runs", "type": "list" },
+        { "name": "analyses", "type": "list" }
+      ],
+      "primaryKey": ["title"],
+      "foreignKeys": [
+        { "fields": ["runs"], "type": "list", "reference": { "resource": "MolecularRun", "fields": ["title"] } },
+        {
+          "fields": ["analyses"],
+          "reference": { "resource": "MolecularAnalysis", "fields": ["title"] }
+        }
+      ]
+    }
+  }
+}

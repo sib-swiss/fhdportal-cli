@@ -1,0 +1,43 @@
+{
+  "$id": "https://fega.swiss/publication.schema.json",
+  "type": "object",
+  "title": "SdaFile",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "required": ["title", "filepath", "filesize", "file_last_modified", "encrypted_checksums"],
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Basename of the file."
+    },
+    "filepath": {
+      "type": "string",
+      "description": "file path in SDA"
+    },
+    "filesize": {
+      "type": "number",
+      "description": "File size in bytes"
+    },
+    "file_last_modified": {
+      "type": "number",
+      "description": "last modification time"
+    },
+    "encrypted_checksums": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "checksum type. SHA256 (prefered), MD5, ..."
+          },
+          "value": {
+            "type": "string",
+            "description": "checksum value"
+          }
+        }
+      },
+      "description": "checksum(s) of file content"
+    }
+  },
+  "description": "metadata file stored in FEGA"
+}

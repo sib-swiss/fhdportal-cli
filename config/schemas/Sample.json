@@ -1,0 +1,84 @@
+{
+  "type": "object",
+  "title": "Sample",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "required": ["alias", "biological_sex", "subject_id", "phenotype"],
+  "properties": {
+    "alias": {
+      "type": "string",
+      "description": "The sample alias"
+    },
+    "cell_line": {
+      "type": "string",
+      "label": "cell line",
+      "description": "The sample cell line"
+    },
+    "phenotype": {
+      "type": "string",
+      "description": "The sample phenotype"
+    },
+    "public_id": {
+      "type": "string",
+      "pattern": "^CHFEGAN[0-9]{11}.*",
+      "description": "Public identifier of the sample"
+    },
+    "subject_id": {
+      "type": "string",
+      "description": "The sample subject ID"
+    },
+    "description": {
+      "type": "string",
+      "description": "The sample description"
+    },
+    "biosample_id": {
+      "type": "string",
+      "description": "The sample biosample ID"
+    },
+    "case_control": {
+      "enum": ["case", "control"],
+      "description": "If the sample is the case or control."
+    },
+    "organism_part": {
+      "type": "string",
+      "description": "The sample organism part"
+    },
+    "biological_sex": {
+      "enum": ["male", "female", "undetermined"],
+      "description": "The sample biological sex."
+    },
+    "extra_attributes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["tag", "value"],
+        "properties": {
+          "tag": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "x-resource": {
+    "schema": {
+      "fields": [
+        { "name": "alias", "constraints": { "required": true } },
+        { "name": "cell_line" },
+        { "name": "phenotype", "constraints": { "required": true } },
+        { "name": "subject_id", "constraints": { "required": true } },
+        { "name": "description" },
+        { "name": "biosample_id" },
+        { "name": "case_control" },
+        { "name": "organism_part" },
+        { "name": "biological_sex", "constraints": { "required": true } }
+      ],
+      "primaryKey": ["alias"]
+    }
+  }
+}

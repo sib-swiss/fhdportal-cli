@@ -1,0 +1,206 @@
+{
+  "type": "object",
+  "title": "MolecularAnalysis",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "required": [
+    "title",
+    "description",
+    "analysis_type",
+    "sdafile_public_ids",
+    "experiment_types",
+    "genome_id",
+    "platform",
+    "molecularexperiment_public_ids",
+    "sample_public_ids"
+  ],
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Title of the analysis"
+    },
+    "platform": {
+      "type": "string",
+      "description": "Name of the analysis platform"
+    },
+    "genome_id": {
+      "enum": [
+        "GRCh38.p14",
+        "GRCh38.p13",
+        "GRCh38.p12",
+        "GRCh38.p11",
+        "GRCh38.p10",
+        "GRCh38.p9",
+        "GRCh38.p8",
+        "GRCh38.p7",
+        "GRCh38.p6",
+        "GRCh38.p5",
+        "GRCh38.p4",
+        "GRCh38.p3",
+        "GRCh38.p2",
+        "GRCh38.p1",
+        "GRCh38",
+        "GRCh37.p13",
+        "GRCh37.p12",
+        "GRCh37.p11",
+        "GRCh37.p10",
+        "GRCh37.p9",
+        "GRCh37.p8",
+        "GRCh37.p7",
+        "GRCh37.p6",
+        "GRCh37.p5",
+        "GRCh37.p4",
+        "GRCh37.p3",
+        "GRCh37.p2",
+        "GRCh37.p1",
+        "GRCh37",
+        "NCBI36",
+        "NA19240_prelim_3.0",
+        "CHM1_1.1"
+      ],
+      "type": "string",
+      "description": "Genome version used in the analysis"
+    },
+    "public_id": {
+      "type": "string",
+      "pattern": "^CHFEGAZ[0-9]{11}",
+      "description": "Public ID of the analysis"
+    },
+    "chromosomes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "label"],
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "list of chromosomes analysed"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of the analysis"
+    },
+    "analysis_type": {
+      "enum": ["REFERENCE ALIGNMENT", "SAMPLE PHENOTYPE", "SEQUENCE VARIATION", "OTHER"],
+      "type": "string",
+      "description": "Type of analysis"
+    },
+    "experiment_types": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "Whole genome sequencing",
+          "Exome sequencing",
+          "Transcriptomics",
+          "Genotyping by sequencing",
+          "Whole transcriptome sequencing",
+          "Genotyping by Array",
+          "Curation",
+          "Target sequencing"
+        ],
+        "type": "string"
+      },
+      "description": "Types of experiment"
+    },
+    "extra_attributes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["tag", "value", "unit"],
+        "properties": {
+          "tag": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Any extra attributes associated with the analysis"
+    },
+    "sdafile_public_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "check": "SdaFile",
+        "pattern": "^CHFEGAF[0-9]{11}.*",
+        "check_title": "title",
+        "check_value": "public_id"
+      },
+      "description": "List of associated file public ids",
+      "uniqueItems": true
+    },
+    "sample_public_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "check": "Sample",
+        "pattern": "^CHFEGAN[0-9]{11}.*",
+        "check_title": "title",
+        "check_value": "public_id"
+      },
+      "description": "List of associated sample public ids",
+      "uniqueItems": true
+    },
+    "molecularexperiment_public_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "check": "MolecularExperiment",
+        "pattern": "^CHFEGAX[0-9]{11}.*",
+        "check_title": "properties.design_description",
+        "check_value": "public_id"
+      },
+      "description": "List of associated experiment public ids",
+      "uniqueItems": true
+    }
+  },
+  "x-resource": {
+    "schema": {
+      "fields": [
+        {
+          "name": "files",
+          "aliasOf": "sdafile_public_ids",
+          "type": "list",
+          "constraints": {
+            "required": true,
+            "jsonSchema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "uniqueItems": true
+            }
+          }
+        },
+        { "name": "title", "constraints": { "required": true } },
+        { "name": "platform", "constraints": { "required": true } },
+        { "name": "genome_id", "constraints": { "required": true } },
+        { "name": "description", "constraints": { "required": true } },
+        { "name": "analysis_type", "constraints": { "required": true } },
+        { "name": "experiment_types", "type": "list", "constraints": { "required": true } },
+        { "name": "samples", "type": "list" },
+        { "name": "experiments", "type": "list" }
+      ],
+      "primaryKey": ["title"],
+      "foreignKeys": [
+        {
+          "fields": ["samples"],
+          "reference": { "resource": "Sample", "fields": ["title"] }
+        },
+        {
+          "fields": ["experiments"],
+          "reference": { "resource": "MolecularExperiment", "fields": ["title"] }
+        }
+      ]
+    }
+  }
+}
