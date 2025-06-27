@@ -70,7 +70,7 @@ class UpdateCommand extends Command
                 throw new RuntimeException('No valid schemas found in the API response');
             }
 
-            $io->success(sprintf('Retrieved %d schemas from API', count($schemas)));
+            $io->success('Retrieved the latest schemas from FHDportal');
 
             // Delete existing schema files
             $io->section('Deleting existing schema files');
@@ -129,7 +129,14 @@ class UpdateCommand extends Command
      */
     private function createSchemaFiles(array $schemas, SymfonyStyle $io): void
     {
+        $createdFilesCount = 0;
+
         foreach ($schemas as $resourceType => $schema) {
+            // Only create files for schemas that contain table schemas
+            if (!isset($schema['x-resource']['schema'])) {
+                continue;
+            }
+
             $filePath = $this->schemaDir . '/' . $resourceType . '.json';
 
             // Format the JSON content
@@ -137,9 +144,10 @@ class UpdateCommand extends Command
 
             $this->filesystem->dumpFile($filePath, $jsonContent);
             $io->text(sprintf('Created: %s.json', $resourceType));
+            $createdFilesCount++;
         }
 
         $io->newLine();
-        $io->text(sprintf('Created %d files', count($schemas)));
+        $io->text(sprintf('Created %d files', $createdFilesCount));
     }
 }
