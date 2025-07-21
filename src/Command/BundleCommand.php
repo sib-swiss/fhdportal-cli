@@ -98,7 +98,11 @@ class BundleCommand extends Command
         // Create a ZIP archive if requested
         if ($createArchive) {
             try {
-                $archivePath = $this->fileService->createArchive($dirPath, $outputFile);
+                // Get a list of files referenced in the manifest
+                $referencedFiles = $this->manifestService->getFiles($manifestPath, true);
+
+                // Create an archive with the referenced files only
+                $archivePath = $this->fileService->createArchive($dirPath, $outputFile, false, $referencedFiles);
                 $io->success("Archive created successfully: $archivePath");
             } catch (Exception $e) {
                 $io->error($e->getMessage());

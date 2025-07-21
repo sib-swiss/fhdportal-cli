@@ -57,7 +57,7 @@ class FileService
     /**
      * Create a ZIP archive of a specified directory
      */
-    public function createArchive(string $dirPath, ?string $outputFile = null, bool $flatten = false): string
+    public function createArchive(string $dirPath, ?string $outputFile = null, bool $flatten = false, ?array $selectedFiles = null): string
     {
         // Determine output path
         $archiveName = basename($dirPath) . '.zip';
@@ -75,29 +75,43 @@ class FileService
             throw new RuntimeException("Failed to create archive: $archivePath");
         }
 
-        // Get all files from the specified directory
-        $files = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($dirPath),
-            RecursiveIteratorIterator::LEAVES_ONLY
-        );
+        if ($selectedFiles !== null) {
+            // Add only selected files to the archive
+            foreach ($selectedFiles as $fileName) {
+                $filePath = $dirPath . '/' . $fileName;
 
-        // Add the files to the archive
-        foreach ($files as $file) {
-            // Skip directories
-            if ($file->isDir()) {
-                continue;
-            }
+                // Check if the file exists
+                if (!file_exists($filePath)) {
+                    throw new RuntimeException("File not found: $fileName");
+                }
 
-            $filePath = $file->getRealPath();
-
-            if ($flatten) {
-                // Add file directly to the root of the archive
-                $fileName = basename($filePath);
                 $archive->addFile($filePath, $fileName);
-            } else {
-                // Maintain directory structure
-                $relativePath = substr($filePath, strlen($dirPath) + 1);
-                $archive->addFile($filePath, $relativePath);
+            }
+        } else {
+            // Get all files from the specified directory
+            $files = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($dirPath),
+                RecursiveIteratorIterator::LEAVES_ONLY
+            );
+
+            // Add the files to the archive
+            foreach ($files as $file) {
+                // Skip directories
+                if ($file->isDir()) {
+                    continue;
+                }
+
+                $filePath = $file->getRealPath();
+
+                if ($flatten) {
+                    // Add file directly to the root of the archive
+                    $fileName = basename($filePath);
+                    $archive->addFile($filePath, $fileName);
+                } else {
+                    // Maintain directory structure
+                    $relativePath = substr($filePath, strlen($dirPath) + 1);
+                    $archive->addFile($filePath, $relativePath);
+                }
             }
         }
 

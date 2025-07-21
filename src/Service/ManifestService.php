@@ -71,6 +71,35 @@ class ManifestService
     }
 
     /**
+     * Get a list of files referenced in a manifest file
+     */
+    public function getFiles(string $manifestPath, bool $includeManifestFile = false): array
+    {
+        // Load and parse the manifest file
+        $manifestData = $this->loadManifestFile($manifestPath);
+
+        if (!isset($manifestData['files']) || !is_array($manifestData['files'])) {
+            throw new Exception("Invalid manifest file format: no files section found");
+        }
+
+        // Extract all referenced file names
+        $fileNames = [];
+        foreach ($manifestData['files'] as $fileEntry) {
+            if (!isset($fileEntry['file_name'])) {
+                throw new Exception("Invalid file entry in manifest: missing file_name");
+            }
+            $fileNames[] = $fileEntry['file_name'];
+        }
+
+        // Include the manifest file itself if requested
+        if ($includeManifestFile) {
+            $fileNames[] = static::MANIFEST_FILE_NAME;
+        }
+
+        return $fileNames;
+    }
+
+    /**
      * Get the full path to the manifest file
      */
     private function getManifestPath(string $packageDir): string
