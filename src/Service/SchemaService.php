@@ -345,6 +345,24 @@ class SchemaService
     }
 
     /**
+     * Get property type from the JSON schema
+     */
+    private function getPropertyType(string $propertyName, string $resourceType): ?string
+    {
+        $resourceSchema = $this->getResourceSchema($resourceType);
+        if ($resourceSchema['status'] !== 'SUCCESS') {
+            return null;
+        }
+
+        $schema = $resourceSchema['schema'];
+        if (isset($schema['properties'][$propertyName]['type'])) {
+            return $schema['properties'][$propertyName]['type'];
+        }
+
+        return null;
+    }
+
+    /**
      * Set a property on a schema object
      */
     public function setProperty(object $schema, string $property, $value): void
@@ -377,12 +395,86 @@ class SchemaService
     }
 
     /**
+     * Convert a string value to an appropriate data type based on common patterns or to a specific data type
+     */
+    private function convertDataType($value, ?string $dataType = null): mixed
+    {
+        // If the value is not a string or it is empty, return as-is
+        if (!is_string($value) || (trim($value) === '')) {
+            return $value;
+        }
+
+        // Trim whitespace from the value
+        $value = trim($value);
+
+        // If a specific data type is provided, attempt conversion for that type only
+        if ($dataType !== null) {
+            switch ($dataType) {
+                case 'number':
+                case 'integer':
+                    if (is_numeric($value)) {
+                        if ($dataType === 'integer' || (ctype_digit($value) || (substr($value, 0, 1) === '-' && ctype_digit(substr($value, 1))))) {
+                            return (int) $value;
+                        }
+                        return (float) $value;
+                    }
+                    break;
+                case 'boolean':
+                    if (in_array(strtolower($value), ['true', 'false', '1', '0'])) {
+                        return in_array(strtolower($value), ['true', '1']);
+                    }
+                    break;
+                case 'null':
+                    if (in_array(strtolower($value), ['null', 'nil', 'none'])) {
+                        return null;
+                    }
+                    break;
+            }
+            // Return as string if specific type conversion fails
+            return $value;
+        }
+
+        // Auto-detect and convert based on common patterns
+
+        // Convert boolean-like values
+        if (in_array(strtolower($value), ['true', 'false'])) {
+            return strtolower($value) === 'true';
+        }
+
+        // Convert null-like values
+        if (in_array(strtolower($value), ['null', 'nil', 'none'])) {
+            return null;
+        }
+
+        // Convert numeric values
+        if (is_numeric($value)) {
+            // Check if it is an integer
+            if (ctype_digit($value) || (substr($value, 0, 1) === '-' && ctype_digit(substr($value, 1)))) {
+                return (int) $value;
+            }
+            // Otherwise, treat it as a float
+            return (float) $value;
+        }
+
+        // Return as string if no conversion is needed
+        return $value;
+    }
+
+    /**
      * Map fields from tabular data to JSON schema properties
      */
-    public function mapFields(array $originalData, array $tableSchema): array
+    public function mapFields(array $originalData, array $tableSchema, string $resourceType = ''): array
     {
         // Check if the table schema has fields defined
         if (!isset($tableSchema['fields']) || empty($tableSchema['fields'])) {
+            if ($resourceType) {
+                $mappedData = [];
+                foreach ($originalData as $columnName => $value) {
+                    $dataType = $this->getPropertyType($columnName, $resourceType);
+                    $mappedData[$columnName] = $this->convertDataType($value, $dataType);
+                }
+                return $mappedData;
+            }
             return $originalData;
         }
 
@@ -399,7 +491,14 @@ class SchemaService
             $fieldName = $field['name'];
             $propertyName = $field['aliasOf'] ?? $fieldName;
             $propertyNames[$fieldName] = $propertyName;
-            $fieldTypes[$fieldName] = $field['type'] ?? 'string';
+
+            // Get field type from x-resource schema, fallback to main schema
+            if (isset($field['type'])) {
+                $fieldTypes[$fieldName] = $field['type'];
+            } else {
+                $dataType = $this->getPropertyType($propertyName, $resourceType);
+                $fieldTypes[$fieldName] = $dataType ?? 'string';
+            }
         }
 
         // Map the original row data using the field name mappings
@@ -411,11 +510,12 @@ class SchemaService
                 if ($fieldType === 'list') {
                     $mappedData[$propertyName] = $this->splitValue($value);
                 } else {
-                    $mappedData[$propertyName] = $value;
+                    $mappedData[$propertyName] = $this->convertDataType($value, $fieldType);
                 }
             } else {
-                // Keep unmapped fields as-is
-                $mappedData[$columnName] = $value;
+                // Keep unmapped fields as-is, but still try to convert data types
+                $dataType = $this->getPropertyType($columnName, $resourceType);
+                $mappedData[$columnName] = $this->convertDataType($value, $dataType);
             }
         }
 

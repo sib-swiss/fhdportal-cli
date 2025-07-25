@@ -214,7 +214,7 @@ class ValidationService
         $header = array_map('trim', $header);
 
         // Get the table schema for the resource type
-        $tableSchema = $this->schemaService->getTableSchema($resourceType);
+        $tableSchema = $this->schemaService->getTableSchema($resourceType) ?? [];
 
         // Process all rows into a data array
         $dataRows = [];
@@ -246,9 +246,7 @@ class ValidationService
             }
 
             // Map the row data fields to JSON schema properties
-            if ($tableSchema) {
-                $rowData = $this->schemaService->mapFields($rowData, $tableSchema);
-            }
+            $rowData = $this->schemaService->mapFields($rowData, $tableSchema, $resourceType);
 
             // Convert the row data to a JSON string
             $jsonData = json_encode($rowData);
