@@ -4,6 +4,8 @@ namespace App\Service;
 
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\String\Inflector\EnglishInflector;
+use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 
 use Exception;
 use RuntimeException;
@@ -11,11 +13,17 @@ use stdClass;
 
 class SchemaService
 {
+    public const DOCUMENTATION_TITLE = 'FHDportal Schema Documentation';
+
     private string $schemaDir;
+    private EnglishInflector $inflector;
+    private CamelCaseToSnakeCaseNameConverter $nameConverter;
 
     public function __construct(ParameterBagInterface $params)
     {
         $this->schemaDir = $params->get('app.schema_dir');
+        $this->inflector = new EnglishInflector();
+        $this->nameConverter = new CamelCaseToSnakeCaseNameConverter();
     }
 
     /**
@@ -794,5 +802,206 @@ class SchemaService
         return isset($foreignKey['fields']) &&
             isset($foreignKey['reference']['resource']) &&
             isset($foreignKey['reference']['fields']);
+    }
+
+    /**
+     * Generate documentation for all resource types
+     */
+    public function generateDocumentation(array $resourceTypes): string
+    {
+        $content = "# " . static::DOCUMENTATION_TITLE . "\n\n";
+        $content .= "## Template Files\n\n";
+
+        foreach ($resourceTypes as $resourceType) {
+            $resourceSchema = $this->getResourceSchema($resourceType);
+            $tableSchema = $this->getTableSchema($resourceType);
+
+            if (!$tableSchema || !isset($tableSchema['fields']) || empty($tableSchema['fields'])) {
+                continue;
+            }
+
+            $fileName = $this->inflector->pluralize($this->nameConverter->normalize($resourceType))[0] . '.tsv';
+            $content .= "### {$fileName}\n\n";
+            $content .= "Resource Type: `{$resourceType}`\n\n";
+
+            if ($resourceSchema['status'] === 'SUCCESS' && isset($resourceSchema['schema']['description'])) {
+                $content .= "Description: {$resourceSchema['schema']['description']}\n\n";
+            }
+
+            $content .= "#### Fields\n\n";
+            $content .= "| Field Name | Type | Description | Required | Constraints | Values |\n";
+            $content .= "|------------|------|-------------|----------|-------------|--------|\n";
+
+            // Get the primary key fields
+            $primaryKeyFields = isset($tableSchema['primaryKey']) ? $tableSchema['primaryKey'] : [];
+
+            foreach ($tableSchema['fields'] as $field) {
+                if (!isset($field['name'])) {
+                    continue;
+                }
+
+                $fieldName = $field['name'];
+                $required = isset($field['constraints']['required']) && $field['constraints']['required'] ? 'yes' : 'no';
+
+                // Check if this field is a primary key
+                $isPrimaryKey = in_array($fieldName, $primaryKeyFields);
+
+                // Get field details from the main schema
+                $fieldDetails = $this->getFieldDetails($resourceSchema, $field, $fieldName, $isPrimaryKey);
+
+                // Underline the field name if it is a primary key
+                $displayFieldName = $isPrimaryKey ? "<u>{$fieldName}</u>" : $fieldName;
+
+                // Add the field details to the table
+                $content .= "| {$displayFieldName} | {$fieldDetails['type']} | {$fieldDetails['description']} | {$required} | {$fieldDetails['constraints']} | {$fieldDetails['validValues']} |\n";
+            }
+
+            $content .= "\n";
+        }
+
+        return $content;
+    }
+
+    /**
+     * Extract field details from the JSON schema
+     */
+    public function getFieldDetails(array $resourceSchema, array $field, string $fieldName, bool $isPrimaryKey = false): array
+    {
+        $details = [
+            'type' => 'string',
+            'constraints' => '',
+            'description' => '',
+            'validValues' => ''
+        ];
+
+        if ($resourceSchema['status'] !== 'SUCCESS' || !isset($resourceSchema['schema']['properties'])) {
+            return $details;
+        }
+
+        $properties = $resourceSchema['schema']['properties'];
+        $schemaFieldName = $this->getSchemaFieldName($field, $fieldName);
+
+        if (!isset($properties[$schemaFieldName])) {
+            return $details;
+        }
+
+        $property = $properties[$schemaFieldName];
+
+        // Extract field details using helper methods
+        $details['type'] = $this->extractFieldType($property);
+        $details['description'] = $this->extractFieldDescription($property);
+        $details['constraints'] = $this->extractFieldConstraints($property, $isPrimaryKey);
+        $details['validValues'] = $this->extractFieldValidValues($property);
+
+        return $details;
+    }
+
+    /**
+     * Get schema field name
+     */
+    private function getSchemaFieldName(array $field, string $fieldName): string
+    {
+        return isset($field['aliasOf']) ? $field['aliasOf'] : $fieldName;
+    }
+
+    /**
+     * Extract field type from property
+     */
+    private function extractFieldType(array $property): string
+    {
+        if (!isset($property['type'])) {
+            return 'string';
+        }
+
+        $type = strtolower($property['type']);
+
+        // Handle array types
+        if ($type === 'array' && isset($property['items']['type'])) {
+            $itemType = strtolower($property['items']['type']);
+            return "array[{$itemType}]";
+        }
+
+        return $type;
+    }
+
+    /**
+     * Extract field description from property
+     */
+    private function extractFieldDescription(array $property): string
+    {
+        return isset($property['description']) ? $property['description'] : '';
+    }
+
+    /**
+     * Extract field constraints from property
+     */
+    private function extractFieldConstraints(array $property, bool $isPrimaryKey = false): string
+    {
+        $constraints = [];
+
+        // Add a unique constraint for primary keys
+        if ($isPrimaryKey) {
+            $constraints[] = 'unique';
+        }
+
+        // Add standard constraints
+        if (isset($property['minLength'])) {
+            $constraints[] = "minimum length: {$property['minLength']}";
+        }
+        if (isset($property['maxLength'])) {
+            $constraints[] = "maximum length: {$property['maxLength']}";
+        }
+        if (isset($property['pattern'])) {
+            $constraints[] = "pattern: `{$property['pattern']}`";
+        }
+        if (isset($property['minimum'])) {
+            $constraints[] = "minimum: {$property['minimum']}";
+        }
+        if (isset($property['maximum'])) {
+            $constraints[] = "maximum: {$property['maximum']}";
+        }
+        if (isset($property['uniqueItems']) && $property['uniqueItems']) {
+            $constraints[] = 'unique items';
+        }
+
+        // Add "one of" constraint for enums
+        if (isset($property['enum'])) {
+            $constraints[] = 'one of';
+        }
+
+        return implode('<br>', $constraints);
+    }
+
+    /**
+     * Extract valid values from property
+     */
+    private function extractFieldValidValues(array $property): string
+    {
+        // Handle enum values
+        if (isset($property['enum'])) {
+            $enumValues = $property['enum'];
+            sort($enumValues, SORT_STRING);
+            $bulletedValues = array_map(function ($value) {
+                return '• `' . $value . '`';
+            }, $enumValues);
+            return implode('<br>', $bulletedValues);
+        }
+
+        // Handle non-enum values based on type
+        return $this->getDefaultValidValues($this->extractFieldType($property));
+    }
+
+    /**
+     * Get default valid values based on field type
+     */
+    private function getDefaultValidValues(string $fieldType): string
+    {
+        if ($fieldType === 'boolean') {
+            return '• `true`<br>• `false`';
+        }
+        if (strpos($fieldType, 'array') === 0) {
+            return 'comma-separated values';
+        }
+        return '';
     }
 }

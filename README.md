@@ -42,7 +42,7 @@ chmod +x bin/console
 
 ## Usage
 
-The FHDportal CLI provides four main commands for working with FHDportal submission bundles:
+The FHDportal CLI provides five main commands for working with FHDportal submission bundles:
 
 ```bash
 bin/console <command> [options] [arguments]
@@ -51,6 +51,7 @@ bin/console <command> [options] [arguments]
 ### Available Commands
 
 - [`update`](#update-command) - Update local JSON schemas
+- [`document`](#document-command) - Generate Markdown documentation for resource schemas
 - [`template`](#template-command) - Generate TSV file templates for metadata
 - [`bundle`](#bundle-command) - Generate a manifest file for a submission bundle
 - [`validate`](#validate-command) - Validate metadata files and submission bundles
@@ -224,6 +225,66 @@ bin/console bundle -w /path/to/submission/data
 
 ```bash
 bin/console bundle -v -a /path/to/submission/data
+```
+
+---
+
+### Document Command
+
+Generate documentation for resource schemas in Markdown or HTML format.
+
+#### Syntax
+
+```bash
+bin/console document [options]
+```
+
+#### Options
+
+- `-o, --output-file=OUTPUT-FILE` - Output file path for the documentation
+- `-f, --output-format=OUTPUT-FORMAT` - Output format: `md` or `html` (default: `md`)
+- `-v, --verbose` - Increase verbosity of messages
+- `-h, --help` - Display help for the command
+
+#### Description
+
+The `document` command generates comprehensive documentation for all available FHDportal resource schemas. This documentation includes detailed information about each resource type, including field descriptions, data types, constraints, and valid values.
+
+**Supported formats:**
+
+- **Markdown (`md`)** - Default format, suitable for documentation repositories and README files
+- **HTML (`html`)** - Web-ready format with professional styling, suitable for hosting and sharing
+
+#### Examples
+
+**Generate Markdown documentation with default filename:**
+
+```bash
+bin/console document
+```
+
+**Generate HTML documentation:**
+
+```bash
+bin/console document -f html
+```
+
+**Specify custom output file:**
+
+```bash
+bin/console document -o resource_schemas.md
+```
+
+**Generate HTML with custom filename:**
+
+```bash
+bin/console document -f html -o docs.html
+```
+
+**Verbose output:**
+
+```bash
+bin/console document -v
 ```
 
 ---
