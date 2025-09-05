@@ -210,7 +210,7 @@ class ValidationService
         $delimiter = $this->fileService->getValueDelimiter($lines[0], $extension);
 
         // Get the header row
-        $header = str_getcsv(array_shift($lines), $delimiter);
+        $header = str_getcsv(array_shift($lines), $delimiter, '"', '\\');
         $header = array_map('trim', $header);
 
         // Get the table schema for the resource type
@@ -230,7 +230,7 @@ class ValidationService
                 continue;
             }
 
-            $row = str_getcsv($line, $delimiter);
+            $row = str_getcsv($line, $delimiter, '"', '\\');
             $rowData = [];
 
             // Convert the row data to an associative array
