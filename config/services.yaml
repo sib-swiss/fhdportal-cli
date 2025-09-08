@@ -5,7 +5,8 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
   api.base_url: 'https://fega-portal-dev.vital-it.ch/api/api/'
-  app.schema_dir: '%kernel.project_dir%/config/schemas'
+  # Use platform-specific data directory for schema storage
+  app.schema_dir: '%env(resolve:FEGA_SCHEMA_DIR)%'
 
 services:
   # default configuration for services in *this* file
@@ -20,6 +21,9 @@ services:
     exclude:
       - '../src/Entity/'
       - '../src/Kernel.php'
+
+  # Application Services
+  App\Service\AppDataService: ~
 
   App\Service\FileService:
     arguments:
@@ -38,3 +42,24 @@ services:
       $fileService: '@App\Service\FileService'
       $manifestService: '@App\Service\ManifestService'
       $schemaService: '@App\Service\SchemaService'
+
+  # Console Commands
+  App\Command\ValidateCommand:
+    tags: ['console.command']
+
+  App\Command\BundleCommand:
+    tags: ['console.command']
+
+  App\Command\DocumentCommand:
+    tags: ['console.command']
+
+  App\Command\TemplateCommand:
+    tags: ['console.command']
+
+  App\Command\UpdateCommand:
+    tags: ['console.command']
+    arguments:
+      $params: '@parameter_bag'
+      $httpClient: '@Symfony\Contracts\HttpClient\HttpClientInterface'
+      $filesystem: '@Symfony\Component\Filesystem\Filesystem'
+      $appDataService: '@App\Service\AppDataService'

@@ -11,6 +11,7 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use App\Service\AppDataService;
 
 use RuntimeException;
 use Throwable;
@@ -26,17 +27,22 @@ class UpdateCommand extends Command
 
     private HttpClientInterface $httpClient;
     private Filesystem $filesystem;
+    private AppDataService $appDataService;
 
     public function __construct(
         ParameterBagInterface $params,
         HttpClientInterface $httpClient,
-        Filesystem $filesystem
+        Filesystem $filesystem,
+        AppDataService $appDataService
     ) {
         parent::__construct();
         $this->apiBaseUrl = rtrim($params->get('api.base_url'), '/');
-        $this->schemaDir = $params->get('app.schema_dir');
         $this->httpClient = $httpClient;
         $this->filesystem = $filesystem;
+        $this->appDataService = $appDataService;
+
+        // Use platform-specific directory
+        $this->schemaDir = $this->appDataService->getSchemaDirectory();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
