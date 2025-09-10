@@ -14,4 +14,11 @@
 .env.*
 /bin/legacy
 /data/
+
+# Build artifacts
+fega.phar
+/dist/
+
+# IDE files
+.vscode/
 ###< project ###

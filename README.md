@@ -40,6 +40,65 @@ composer install
 chmod +x bin/console
 ```
 
+## Binary Distribution
+
+For easier deployment and usage, the FHDportal CLI is also available as pre-built binaries that do not require PHP installation.
+
+### Download Binaries
+
+Download the appropriate binary for your platform:
+
+- **Linux (x64)**: `fega-linux`
+- **macOS (Intel)**: `fega-macos-x64`
+- **macOS (Apple Silicon)**: `fega-macos-arm`
+- **Windows (x64)**: `fega-windows.exe`
+
+### Installation
+
+1. **Make executable** (Linux/macOS):
+```bash
+chmod +x fega-linux  # or fega-macos-arm
+```
+
+2. **Rename for convenience** (optional):
+```bash
+# Linux
+mv fega-linux fega
+
+# macOS (choose the right one for your system)
+mv fega-macos-x64 fega    # Intel Mac
+mv fega-macos-arm fega    # Apple Silicon Mac
+
+# Windows
+mv fega-windows.exe fega.exe
+```
+
+3. **Add to PATH** (optional):
+```bash
+# Linux/macOS - move to /usr/local/bin or add directory to PATH
+sudo mv fega /usr/local/bin/
+
+# Windows - move to a directory in your PATH or add directory to PATH
+```
+
+### Usage with Binaries
+
+Once installed, use the binary just like the PHP version:
+
+```bash
+# Using renamed binary
+fega --help
+fega validate my-genomic-study/
+fega update
+fega template -o templates.zip
+
+# Using full binary name
+./fega-linux validate my-genomic-study/
+./fega-macos-x64 update        # Intel Mac
+./fega-macos-arm update        # Apple Silicon Mac
+./fega-windows.exe template -o templates.zip
+```
+
 ## Usage
 
 The FHDportal CLI provides five main commands for working with FHDportal submission bundles:

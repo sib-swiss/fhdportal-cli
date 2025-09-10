@@ -1,0 +1,42 @@
+#!/usr/bin/env php
+<?php
+/*
+ * This file is part of the FHDportal CLI application.
+ */
+
+use App\Kernel;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
+
+// Set default environment for PHAR
+$_SERVER['APP_ENV'] = $_SERVER['APP_ENV'] ?? 'prod';
+$_SERVER['APP_DEBUG'] = $_SERVER['APP_DEBUG'] ?? '0';
+$_ENV['APP_ENV'] = $_SERVER['APP_ENV'];
+$_ENV['APP_DEBUG'] = $_SERVER['APP_DEBUG'];
+
+# Create a writable cache directory outside the PHAR
+$cacheDir = sys_get_temp_dir() . '/fega-cache';
+if (!is_dir($cacheDir)) {
+    @mkdir($cacheDir, 0755, true);
+}
+
+# Set schema directory environment variable for PHPacker compatibility
+if (!getenv('FEGA_SCHEMA_DIR')) {
+    $appName = 'fega';
+    $schemaDir = match (PHP_OS_FAMILY) {
+        'Darwin' => getenv('HOME') . '/Library/Application Support/.' . $appName . '/schemas',
+        'Windows' => getenv('LOCALAPPDATA') . '/' . $appName . '/schemas',
+        default => getenv('HOME') . '/.' . $appName . '/schemas'
+    };
+    $_ENV['FEGA_SCHEMA_DIR'] = $schemaDir;
+    putenv('FEGA_SCHEMA_DIR=' . $schemaDir);
+}
+
+Phar::mapPhar('fega.phar');
+
+require_once 'phar://fega.phar/vendor/autoload.php';
+
+$kernel = new Kernel($_SERVER['APP_ENV'], (bool) $_SERVER['APP_DEBUG'], $cacheDir);
+$application = new Application($kernel);
+$application->run();
+
+__HALT_COMPILER();
