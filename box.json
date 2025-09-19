@@ -1,17 +1,13 @@
 {
   "output": "fega.phar",
-  "chmod": "0755",
   "main": "bin/console",
   "directories": ["src", "config", "vendor"],
   "files": ["composer.json"],
   "exclude-composer-files": false,
-  "exclude-dev-files": true,
   "compression": "GZ",
   "compactors": ["KevinGH\\Box\\Compactor\\Php"],
   "annotations": {
     "ignore": ["author", "since", "version"]
   },
-  "stub": "bin/console.stub",
-  "alias": "fega.phar",
-  "banner": null
+  "stub": "bin/console.stub"
 }
