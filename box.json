@@ -1,7 +1,7 @@
 {
   "output": "fega.phar",
   "main": "bin/console",
-  "directories": ["src", "config", "vendor"],
+  "directories": ["src", "config", "vendor", "public"],
   "files": ["composer.json"],
   "exclude-composer-files": false,
   "compression": "GZ",
