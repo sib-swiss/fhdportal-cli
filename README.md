@@ -56,11 +56,13 @@ Download the appropriate binary for your platform:
 ### Installation
 
 1. **Make executable** (Linux/macOS):
+
 ```bash
 chmod +x fega-linux  # or fega-macos-arm
 ```
 
 2. **Rename for convenience** (optional):
+
 ```bash
 # Linux
 mv fega-linux fega
@@ -74,6 +76,7 @@ mv fega-windows.exe fega.exe
 ```
 
 3. **Add to PATH** (optional):
+
 ```bash
 # Linux/macOS - move to /usr/local/bin or add directory to PATH
 sudo mv fega /usr/local/bin/
@@ -446,7 +449,7 @@ bin/console validate [options] <target-path>
 
 #### Arguments
 
-- `target-path` **(required)** - File or directory path to validate
+- `target-path` **(required)** - File or directory path to validate (use "-" to read from STDIN)
 
 #### Options
 
@@ -465,6 +468,7 @@ The `validate` command performs comprehensive validation of FHDportal metadata f
 - **ZIP archives** - Extracts and validates as submission bundles
 - **TSV/CSV files** - Validates individual metadata files
 - **JSON files** - Validates individual resource files
+- **STDIN** - Reads input from standard input (use "-" as target-path)
 
 **Validation features:**
 
@@ -504,6 +508,30 @@ bin/console validate -f json /path/to/bundle
 
 ```bash
 bin/console validate -v /path/to/bundle
+```
+
+**Validate JSON input from STDIN:**
+
+```bash
+echo '{"study_id": "STUDY001", "title": "Test Study"}' | bin/console validate - -t Study
+```
+
+**Pipe file content to validation:**
+
+```bash
+cat datasets.tsv | bin/console validate - -t Dataset
+```
+
+**Use here-document for multi-line input:**
+
+```bash
+bin/console validate - -t Study <<EOF
+{
+  "study_id": "STUDY001",
+  "title": "Genomic Analysis Study",
+  "description": "A comprehensive genomic study"
+}
+EOF
 ```
 
 #### Resource Types

@@ -35,7 +35,7 @@ class ValidateCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addArgument('target-path', InputArgument::REQUIRED, 'File or directory path')
+            ->addArgument('target-path', InputArgument::REQUIRED, 'File or directory path (use "-" to read from STDIN)')
             ->addOption('resource-type', 't', InputOption::VALUE_OPTIONAL, 'Type of the resource', 'SubmissionBundle')
             ->addOption('output-format', 'f', InputOption::VALUE_OPTIONAL, 'Output format (json or text)', 'text');
     }
@@ -45,10 +45,17 @@ class ValidateCommand extends Command
         // Get the input and output interfaces
         $io = new SymfonyStyle($input, $output);
 
+        $targetPathArg = $input->getArgument('target-path');
+
+        // Handle STDIN
+        if ($targetPathArg === '-') {
+            return $this->handleStandardInput($input, $output, $io);
+        }
+
         // Validate the target path
-        $targetPath = realpath($input->getArgument('target-path'));
+        $targetPath = realpath($targetPathArg);
         if ($targetPath === false) {
-            $io->error("Invalid target path: " . $input->getArgument('target-path'));
+            $io->error("Invalid target path: " . $targetPathArg);
             return Command::INVALID;
         }
 
@@ -128,6 +135,66 @@ class ValidateCommand extends Command
                 // Delete the temporary directory
                 $this->fileService->removeTempDirectory($targetPath);
             }
+        }
+    }
+
+    private function handleStandardInput(InputInterface $input, OutputInterface $output, SymfonyStyle $io): int
+    {
+        $resourceType = $input->getOption('resource-type');
+        $outputFormat = $input->getOption('output-format');
+        $isVerbose = $io->isVerbose();
+
+        if ($isVerbose) {
+            $io->title('FEGA Metadata Validation');
+            $io->section('Configuration');
+            $io->listing([
+                "Input: STDIN",
+                "Resource type: $resourceType",
+                "Output format: $outputFormat"
+            ]);
+        }
+
+        // Read from STDIN
+        $content = stream_get_contents(STDIN);
+
+        if (empty($content)) {
+            $io->error('No input provided via STDIN');
+            return Command::INVALID;
+        }
+
+        try {
+            // Detect the input format
+            $trimmedContent = trim($content);
+            $isJson = $trimmedContent[0] === '{' || $trimmedContent[0] === '[';
+
+            // Create a temporary file
+            $extension = $isJson ? '.json' : '.tsv';
+            $tempFile = tempnam(sys_get_temp_dir(), 'fega_stdin_') . $extension;
+
+            if ($tempFile === false) {
+                $io->error('Failed to create temporary file');
+                return Command::FAILURE;
+            }
+
+            file_put_contents($tempFile, $content);
+
+            // Validate based on the detected format
+            if ($isJson) {
+                $validationResult = $this->validationService->validateResource($tempFile, $resourceType, true);
+            } else {
+                $validationResult = $this->validationService->validateResources($tempFile, $resourceType);
+            }
+
+            // Clean up
+            unlink($tempFile);
+
+            return $this->outputResult($validationResult, $outputFormat, $io);
+        } catch (Exception $e) {
+            if (isset($tempFile) && file_exists($tempFile)) {
+                unlink($tempFile);
+            }
+            $io->error($e->getMessage());
+            return Command::FAILURE;
         }
     }
 
