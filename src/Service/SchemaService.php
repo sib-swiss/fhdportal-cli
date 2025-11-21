@@ -407,13 +407,18 @@ class SchemaService
      */
     private function convertDataType($value, ?string $dataType = null): mixed
     {
-        // If the value is not a string or it is empty, return as-is
-        if (!is_string($value) || (trim($value) === '')) {
+        // If the value is not a string, return as-is
+        if (!is_string($value)) {
             return $value;
         }
 
         // Trim whitespace from the value
         $value = trim($value);
+
+        // Convert empty strings to null
+        if ($value === '') {
+            return null;
+        }
 
         // If a specific data type is provided, attempt conversion for that type only
         if ($dataType !== null) {
@@ -479,7 +484,11 @@ class SchemaService
                 $mappedData = [];
                 foreach ($originalData as $columnName => $value) {
                     $dataType = $this->getPropertyType($columnName, $resourceType);
-                    $mappedData[$columnName] = $this->convertDataType($value, $dataType);
+                    $convertedValue = $this->convertDataType($value, $dataType);
+                    // Only include the field if it has a non-null value
+                    if ($convertedValue !== null) {
+                        $mappedData[$columnName] = $convertedValue;
+                    }
                 }
                 return $mappedData;
             }
@@ -516,14 +525,24 @@ class SchemaService
                 $fieldType = $fieldTypes[$columnName] ?? 'string';
 
                 if ($fieldType === 'list') {
-                    $mappedData[$propertyName] = $this->splitValue($value);
+                    $convertedValue = $this->splitValue($value);
                 } else {
-                    $mappedData[$propertyName] = $this->convertDataType($value, $fieldType);
+                    $convertedValue = $this->convertDataType($value, $fieldType);
+                }
+
+                // Only include the field if it has a non-null value
+                if ($convertedValue !== null) {
+                    $mappedData[$propertyName] = $convertedValue;
                 }
             } else {
                 // Keep unmapped fields as-is, but still try to convert data types
                 $dataType = $this->getPropertyType($columnName, $resourceType);
-                $mappedData[$columnName] = $this->convertDataType($value, $dataType);
+                $convertedValue = $this->convertDataType($value, $dataType);
+
+                // Only include the field if it has a non-null value
+                if ($convertedValue !== null) {
+                    $mappedData[$columnName] = $convertedValue;
+                }
             }
         }
 
