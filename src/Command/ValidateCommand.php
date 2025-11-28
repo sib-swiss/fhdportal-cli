@@ -284,9 +284,23 @@ class ValidateCommand extends Command
         if (isset($errors['errors'])) {
             $this->displayErrors($errors['errors'], $io);
         } else {
-            // Group the errors by their structure and content
-            $groupedErrors = $this->groupSimilarErrors($errors);
-            $this->outputGroupedErrors($groupedErrors, $io, true);
+            // Check if this looks like JSON schema validation errors
+            $hasPathKeys = false;
+            foreach (array_keys($errors) as $key) {
+                if (is_string($key) && (str_starts_with($key, '/') || $key === '')) {
+                    $hasPathKeys = true;
+                    break;
+                }
+            }
+
+            if ($hasPathKeys) {
+                // Display JSON schema validation errors directly
+                $this->displayErrors($errors, $io);
+            } else {
+                // Group the errors by their structure and content (for tabular data)
+                $groupedErrors = $this->groupSimilarErrors($errors);
+                $this->outputGroupedErrors($groupedErrors, $io, true);
+            }
         }
     }
 
