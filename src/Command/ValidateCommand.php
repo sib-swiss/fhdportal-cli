@@ -93,7 +93,7 @@ class ValidateCommand extends Command
                         $validationResult = $this->validationService->validateResources($targetPath, $resourceType);
                         break;
                     case 'json':
-                        $validationResult = $this->validationService->validateResource($targetPath, $resourceType, false);
+                        $validationResult = $this->validationService->validateResource($targetPath, $resourceType);
                         break;
                     default:
                         $io->error("Unsupported file type: $fileExtension");
@@ -180,7 +180,7 @@ class ValidateCommand extends Command
 
             // Validate based on the detected format
             if ($isJson) {
-                $validationResult = $this->validationService->validateResource($tempFile, $resourceType, true);
+                $validationResult = $this->validationService->validateResource($tempFile, $resourceType);
             } else {
                 $validationResult = $this->validationService->validateResources($tempFile, $resourceType);
             }
