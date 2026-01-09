@@ -65,10 +65,12 @@ class ValidateCommand extends Command
         $isVerbose = $io->isVerbose();
 
         // Display the configuration details
+        // When JSON format is selected, write verbose output to stderr to avoid contaminating JSON output
         if ($isVerbose) {
-            $io->title('FEGA Metadata Validation');
-            $io->section('Configuration');
-            $io->listing([
+            $outputStyle = ($outputFormat === 'json') ? $io->getErrorStyle() : $io;
+            $outputStyle->title('FEGA Metadata Validation');
+            $outputStyle->section('Configuration');
+            $outputStyle->listing([
                 "Target path: $targetPath",
                 "Resource type: $resourceType",
                 "Output format: $outputFormat"
@@ -144,10 +146,12 @@ class ValidateCommand extends Command
         $outputFormat = $input->getOption('output-format');
         $isVerbose = $io->isVerbose();
 
+        // When JSON format is selected, write verbose output to stderr to avoid contaminating JSON output
         if ($isVerbose) {
-            $io->title('FEGA Metadata Validation');
-            $io->section('Configuration');
-            $io->listing([
+            $outputStyle = ($outputFormat === 'json') ? $io->getErrorStyle() : $io;
+            $outputStyle->title('FEGA Metadata Validation');
+            $outputStyle->section('Configuration');
+            $outputStyle->listing([
                 "Input: STDIN",
                 "Resource type: $resourceType",
                 "Output format: $outputFormat"
@@ -200,8 +204,10 @@ class ValidateCommand extends Command
 
     private function outputResult(array $result, string $outputFormat, SymfonyStyle $io): int
     {
+        // When JSON format is selected, write verbose output to stderr to avoid contaminating JSON output
         if ($io->isVerbose()) {
-            $io->section('Validation Results');
+            $outputStyle = ($outputFormat === 'json') ? $io->getErrorStyle() : $io;
+            $outputStyle->section('Validation Results');
         }
 
         // Determine the output format and display the results accordingly
