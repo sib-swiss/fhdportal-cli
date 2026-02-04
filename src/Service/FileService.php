@@ -144,7 +144,7 @@ class FileService
         $this->filesystem->copy($filePath, $tempFilePath);
 
         // Extract the archive file
-        $cmd = "unzip -q -j " . escapeshellarg($tempFilePath) . " -d " . escapeshellarg($tempDirPath);
+        $cmd = "unzip -o -q -j " . escapeshellarg($tempFilePath) . " -d " . escapeshellarg($tempDirPath);
         exec($cmd, $output, $returnCode);
 
         // Check if the extraction was successful
