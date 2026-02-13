@@ -138,6 +138,12 @@
                 {
                     "name": "analyses",
                     "type": "list"
+                },
+                {
+                    "name": "released_date",
+                    "constraints": {
+                        "required": true
+                    }
                 }
             ],
             "primaryKey": [

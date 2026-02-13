@@ -1,0 +1,176 @@
+{
+    "type": "object",
+    "title": "Image Analysis",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "required": [
+        "title",
+        "description",
+        "analysis_result_type",
+        "sdafile_public_ids",
+        "analysis_method_and_details",
+        "imageexperiment_public_ids",
+        "sample_public_ids"
+    ],
+    "properties": {
+        "title": {
+            "type": "string",
+            "description": "Title of the analysis"
+        },
+        "public_id": {
+            "type": "string",
+            "pattern": "^CHFEGAZ[0-9]{11}",
+            "description": "Public ID of the analysis"
+        },
+        "description": {
+            "type": "string",
+            "description": "Description of the analysis"
+        },
+        "extra_attributes": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "tag",
+                    "value",
+                    "unit"
+                ],
+                "properties": {
+                    "tag": {
+                        "type": "string"
+                    },
+                    "unit": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "type": "string"
+                    }
+                }
+            },
+            "description": "Any extra attributes associated with the analysis"
+        },
+        "sample_public_ids": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "pattern": "^CHFEGAN[0-9]{11}.*",
+                "x-check": "Sample",
+                "x-check_title": "title",
+                "x-check_value": "public_id"
+            },
+            "description": "List of associated sample public ids",
+            "uniqueItems": true
+        },
+        "sdafile_public_ids": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "pattern": "^CHFEGAF[0-9]{11}.*",
+                "x-check": "SdaFile",
+                "x-check_title": "title",
+                "x-check_value": "public_id"
+            },
+            "description": "List of associated file public ids",
+            "uniqueItems": true
+        },
+        "analysis_result_type": {
+            "type": "string",
+            "description": "Numerical analyses, segmention (non-image), categorical features/phenotypes"
+        },
+        "imageexperiment_public_ids": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "pattern": "^CHFEGAX[0-9]{11}.*",
+                "x-check": "ImageExperiment",
+                "x-check_title": "properties.design_description",
+                "x-check_value": "public_id"
+            },
+            "description": "List of associated experiment public ids",
+            "uniqueItems": true
+        },
+        "analysis_method_and_details": {
+            "type": "string",
+            "description": "Analysis method"
+        }
+    },
+    "x-resource": {
+        "schema": {
+            "fields": [
+                {
+                    "name": "files",
+                    "type": "list",
+                    "aliasOf": "sdafile_public_ids",
+                    "constraints": {
+                        "required": true,
+                        "jsonSchema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            },
+                            "uniqueItems": true
+                        }
+                    }
+                },
+                {
+                    "name": "title",
+                    "constraints": {
+                        "required": true
+                    }
+                },
+                {
+                    "name": "analysis_method_and_details",
+                    "constraints": {
+                        "required": true
+                    }
+                },
+                {
+                    "name": "description",
+                    "constraints": {
+                        "required": true
+                    }
+                },
+                {
+                    "name": "analysis_result_type",
+                    "constraints": {
+                        "required": true
+                    }
+                },
+                {
+                    "name": "samples",
+                    "type": "list"
+                },
+                {
+                    "name": "experiments",
+                    "type": "list"
+                }
+            ],
+            "primaryKey": [
+                "title"
+            ],
+            "foreignKeys": [
+                {
+                    "fields": [
+                        "samples"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "title"
+                        ],
+                        "resource": "Sample"
+                    }
+                },
+                {
+                    "fields": [
+                        "experiments"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "title"
+                        ],
+                        "resource": "ImageExperiment"
+                    }
+                }
+            ]
+        }
+    }
+}
