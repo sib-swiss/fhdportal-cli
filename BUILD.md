@@ -138,6 +138,41 @@ The PHAR includes:
 - Dependencies (`vendor/`)
 - Build configuration (`box.json`, `bin/console.stub`)
 
+## Docker Usage
+
+FEGA CLI can be easily containerized using Docker.
+
+### Building Docker Image
+
+```bash
+# Build from the included Dockerfile
+docker build -t fega-cli .
+
+# Verify the build
+docker run --rm fega-cli php fega.phar --version
+```
+
+### Using Custom Schema Directory
+
+The FEGA CLI respects the `FEGA_SCHEMA_DIR` environment variable for custom schema storage locations:
+
+```bash
+# Run with default schema location (/opt/fega/schemas)
+docker run --rm fega-cli php fega.phar update
+
+# Run with custom schema location
+docker run --rm -e FEGA_SCHEMA_DIR=/custom/path \
+  -v $(pwd)/schemas:/custom/path \
+  fega-cli php fega.phar update
+
+# Validate with persistent schemas
+docker run --rm \
+  -e FEGA_SCHEMA_DIR=/data/schemas \
+  -v $(pwd)/schemas:/data/schemas \
+  -v $(pwd)/metadata:/data/metadata \
+  fega-cli php fega.phar validate /data/metadata
+```
+
 ## Troubleshooting
 
 ### Build Issues
