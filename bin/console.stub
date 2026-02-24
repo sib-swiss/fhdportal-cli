@@ -7,11 +7,14 @@
 use App\Kernel;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 
-// Set default environment for PHAR
-$_SERVER['APP_ENV'] = $_SERVER['APP_ENV'] ?? 'prod';
-$_SERVER['APP_DEBUG'] = $_SERVER['APP_DEBUG'] ?? '0';
-$_ENV['APP_ENV'] = $_SERVER['APP_ENV'];
-$_ENV['APP_DEBUG'] = $_SERVER['APP_DEBUG'];
+// Isolate PHAR from the host Symfony application environment
+// Force these values regardless of what is in the external environment
+$_SERVER['APP_ENV'] = 'prod';
+$_SERVER['APP_DEBUG'] = '0';
+unset($_SERVER['APP_SECRET']);
+$_ENV['APP_ENV'] = 'prod';
+$_ENV['APP_DEBUG'] = '0';
+unset($_ENV['APP_SECRET']);
 
 # Create a writable cache directory outside the PHAR
 $cacheDir = sys_get_temp_dir() . '/fega-cache';
