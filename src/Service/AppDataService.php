@@ -10,6 +10,13 @@ class AppDataService
 
     public function getSchemaDirectory(): string
     {
+        // Check if an environment variable is set
+        $envSchemaDir = getenv('FEGA_SCHEMA_DIR');
+        if ($envSchemaDir !== false && $envSchemaDir !== '') {
+            return $envSchemaDir;
+        }
+
+        // Fall back to platform-specific directory
         $appDataDir = $this->getAppDataDirectory();
         return Path::join($appDataDir, 'schemas');
     }

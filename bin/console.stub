@@ -19,7 +19,7 @@ if (!is_dir($cacheDir)) {
     @mkdir($cacheDir, 0755, true);
 }
 
-# Set schema directory environment variable for PHPacker compatibility
+# Set default schema directory environment variable
 if (!getenv('FEGA_SCHEMA_DIR')) {
     $appName = 'fega';
     $schemaDir = match (PHP_OS_FAMILY) {
