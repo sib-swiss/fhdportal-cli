@@ -77,15 +77,22 @@ class FileService
 
         if ($selectedFiles !== null) {
             // Add only selected files to the archive
+            $resolvedDirPath = realpath($dirPath);
             foreach ($selectedFiles as $fileName) {
                 $filePath = $dirPath . '/' . $fileName;
 
-                // Check if the file exists
-                if (!file_exists($filePath)) {
-                    throw new RuntimeException("File not found: $fileName");
+                // Guard against path traversal
+                $resolvedFilePath = realpath($filePath);
+                if (
+                    $resolvedFilePath === false
+                    || $resolvedDirPath === false
+                    || !str_starts_with($resolvedFilePath, $resolvedDirPath . DIRECTORY_SEPARATOR)
+                ) {
+                    $archive->close();
+                    throw new RuntimeException("File path is outside the package directory: $fileName");
                 }
 
-                $archive->addFile($filePath, $fileName);
+                $archive->addFile($resolvedFilePath, $fileName);
             }
         } else {
             // Get all files from the specified directory

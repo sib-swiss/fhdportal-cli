@@ -176,8 +176,19 @@ class ManifestService
      */
     private function validateFileExists(string $packageDir, string $fileName): void
     {
-        if (!file_exists($packageDir . '/' . $fileName)) {
+        $resolvedPackageDir = realpath($packageDir);
+        $resolvedFilePath   = realpath($packageDir . '/' . $fileName);
+
+        if ($resolvedFilePath === false) {
             throw new Exception("File not found: {$fileName}");
+        }
+
+        // Guard against path traversal
+        if (
+            $resolvedPackageDir === false
+            || !str_starts_with($resolvedFilePath, $resolvedPackageDir . DIRECTORY_SEPARATOR)
+        ) {
+            throw new Exception("File path is outside the package directory: {$fileName}");
         }
     }
 
