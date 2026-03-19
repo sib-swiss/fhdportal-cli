@@ -57,7 +57,10 @@ class UpdateCommand extends Command
             $schemasUrl = $this->apiBaseUrl . '/schemas';
             $io->text("Requesting schemas from: $schemasUrl");
 
-            $response = $this->httpClient->request('GET', $schemasUrl);
+            $response = $this->httpClient->request('GET', $schemasUrl, [
+                'timeout' => 30,
+                'max_duration' => 60,
+            ]);
             $content = $response->getContent();
             $data = json_decode($content, true);
 
