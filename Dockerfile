@@ -35,5 +35,14 @@ RUN chmod +x /app/fega.phar
 # Verify installation
 RUN php /app/fega.phar --version
 
+# Create a non-root user
+RUN addgroup -S fega && adduser -S fega -G fega
+
+# Set correct ownership
+RUN chown -R fega:fega /app /opt/fega
+
+# Drop privileges
+USER fega
+
 # Default command: show help
 CMD ["php", "/app/fega.phar", "--help"]
