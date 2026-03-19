@@ -13,6 +13,7 @@ use Symfony\Component\Finder\Finder;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use App\Service\AppDataService;
 
+use InvalidArgumentException;
 use RuntimeException;
 use Throwable;
 
@@ -131,6 +132,21 @@ class UpdateCommand extends Command
     }
 
     /**
+     * Validate that a resource type name contains only safe characters
+     *
+     * @throws InvalidArgumentException if the name contains disallowed characters
+     */
+    private function sanitizeResourceType(string $resourceType): string
+    {
+        if (!preg_match('/^[A-Za-z0-9_-]+$/', $resourceType)) {
+            throw new InvalidArgumentException(
+                "Invalid resource type name: '$resourceType'. Only alphanumeric characters, underscores, and hyphens are allowed."
+            );
+        }
+        return $resourceType;
+    }
+
+    /**
      * Create new schema files
      */
     private function createSchemaFiles(array $schemas, SymfonyStyle $io): void
@@ -143,6 +159,7 @@ class UpdateCommand extends Command
                 continue;
             }
 
+            $resourceType = $this->sanitizeResourceType($resourceType);
             $filePath = $this->schemaDir . '/' . $resourceType . '.json';
 
             // Format the JSON content

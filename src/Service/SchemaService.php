@@ -8,6 +8,7 @@ use Symfony\Component\String\Inflector\EnglishInflector;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 
 use Exception;
+use InvalidArgumentException;
 use RuntimeException;
 use stdClass;
 
@@ -27,10 +28,26 @@ class SchemaService
     }
 
     /**
+     * Validate that a resource type name contains only safe characters
+     *
+     * @throws InvalidArgumentException if the name contains disallowed characters
+     */
+    private function sanitizeResourceType(string $resourceType): string
+    {
+        if (!preg_match('/^[A-Za-z0-9_-]+$/', $resourceType)) {
+            throw new InvalidArgumentException(
+                "Invalid resource type name: '$resourceType'. Only alphanumeric characters, underscores, and hyphens are allowed."
+            );
+        }
+        return $resourceType;
+    }
+
+    /**
      * Check if a resource type exists
      */
     public function isResourceType(string $resourceType): bool
     {
+        $resourceType = $this->sanitizeResourceType($resourceType);
         $schemaPath = $this->schemaDir . "/{$resourceType}.json";
         return file_exists($schemaPath);
     }
@@ -65,6 +82,7 @@ class SchemaService
      */
     public function getResourceSchema(string $resourceType): array
     {
+        $resourceType = $this->sanitizeResourceType($resourceType);
         $schemaPath = $this->schemaDir . "/{$resourceType}.json";
 
         $refData = [
