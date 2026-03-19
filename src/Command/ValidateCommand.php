@@ -159,7 +159,12 @@ class ValidateCommand extends Command
         }
 
         // Read from STDIN
-        $content = stream_get_contents(STDIN);
+        $maxBytes = 50 * 1024 * 1024; // 50 MB limit to prevent memory exhaustion
+        $content = stream_get_contents(STDIN, $maxBytes);
+
+        if (strlen((string) $content) === $maxBytes) {
+            $io->warning("Input truncated at {$maxBytes} bytes. Use a file argument for large inputs.");
+        }
 
         if (empty($content)) {
             $io->error('No input provided via STDIN');
@@ -172,13 +177,14 @@ class ValidateCommand extends Command
             $isJson = $trimmedContent[0] === '{' || $trimmedContent[0] === '[';
 
             // Create a temporary file
-            $extension = $isJson ? '.json' : '.tsv';
-            $tempFile = tempnam(sys_get_temp_dir(), 'fega_stdin_') . $extension;
-
-            if ($tempFile === false) {
+            $tempBase = tempnam(sys_get_temp_dir(), 'fega_stdin_');
+            if ($tempBase === false) {
                 $io->error('Failed to create temporary file');
                 return Command::FAILURE;
             }
+            $extension = $isJson ? '.json' : '.tsv';
+            $tempFile = $tempBase . $extension;
+            rename($tempBase, $tempFile);
 
             file_put_contents($tempFile, $content);
 
