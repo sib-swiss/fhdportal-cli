@@ -146,18 +146,52 @@ class FileService
         // Create a temporary directory
         $tempDirPath = $this->createTempDirectory();
 
-        // Copy the archive file to the temporary directory
-        $tempFilePath = $tempDirPath . '/' . basename($filePath);
-        $this->filesystem->copy($filePath, $tempFilePath);
-
-        // Extract the archive file
-        $cmd = "unzip -o -q -j " . escapeshellarg($tempFilePath) . " -d " . escapeshellarg($tempDirPath);
-        exec($cmd, $output, $returnCode);
-
-        // Check if the extraction was successful
-        if ($returnCode !== 0) {
-            throw new RuntimeException("Failed to extract archive file: $filePath");
+        // Open the archive
+        $archive = new ZipArchive();
+        if ($archive->open($filePath) !== true) {
+            $this->filesystem->remove($tempDirPath);
+            throw new RuntimeException("Failed to open archive: $filePath");
         }
+
+        // Zip-slip protection: validate every entry before extracting
+        $resolvedTempDir = realpath($tempDirPath);
+        for ($i = 0; $i < $archive->numFiles; $i++) {
+            $entry = $archive->getNameIndex($i);
+
+            // Strip directory components to flatten the structure
+            $safeName = basename($entry);
+            if ($safeName === '' || $safeName === '.' || $safeName === '..') {
+                continue;
+            }
+
+            // Construct the destination path for the entry
+            $destPath = $resolvedTempDir . DIRECTORY_SEPARATOR . $safeName;
+
+            // Ensure the destination path is within the temporary directory
+            if (!str_starts_with($destPath, $resolvedTempDir . DIRECTORY_SEPARATOR)) {
+                $archive->close();
+                $this->filesystem->remove($tempDirPath);
+                throw new RuntimeException("Zip-slip detected in archive entry: $entry");
+            }
+        }
+
+        // Extract each file individually
+        for ($i = 0; $i < $archive->numFiles; $i++) {
+            $entry = $archive->getNameIndex($i);
+            $safeName = basename($entry);
+            if ($safeName === '' || $safeName === '.' || $safeName === '..') {
+                continue;
+            }
+            $entryStream = $archive->getStream($entry);
+            if ($entryStream === false) {
+                continue;
+            }
+            $destPath = $tempDirPath . DIRECTORY_SEPARATOR . $safeName;
+            file_put_contents($destPath, $entryStream);
+            fclose($entryStream);
+        }
+
+        $archive->close();
 
         return $tempDirPath;
     }
