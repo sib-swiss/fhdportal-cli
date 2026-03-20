@@ -2,8 +2,8 @@
 framework:
     secret: '%env(APP_SECRET)%'
 
-    # Note that the session will be started ONLY if you read or write from it.
-    session: true
+    # Sessions are disabled: this is a CLI application with no session use.
+    session: false
 
     #esi: true
     #fragments: true
