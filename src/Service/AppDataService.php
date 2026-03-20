@@ -8,17 +8,45 @@ class AppDataService
 {
     private string $appName = 'fega';
 
+    /**
+     * Sensitive root directories that must never be used as a schema store.
+     */
+    private const SENSITIVE_ROOTS = ['/etc', '/proc', '/sys', '/dev', '/boot', '/bin', '/sbin', '/usr/bin', '/usr/sbin'];
+
     public function getSchemaDirectory(): string
     {
         // Check if an environment variable is set
         $envSchemaDir = getenv('FEGA_SCHEMA_DIR');
         if ($envSchemaDir !== false && $envSchemaDir !== '') {
+            $this->assertSafeSchemaDir($envSchemaDir);
             return $envSchemaDir;
         }
 
         // Fall back to platform-specific directory
         $appDataDir = $this->getAppDataDirectory();
         return Path::join($appDataDir, 'schemas');
+    }
+
+    /**
+     * Reject FEGA_SCHEMA_DIR values that point at sensitive system directories.
+     *
+     * @throws \RuntimeException if the path resolves to a known-sensitive location
+     */
+    private function assertSafeSchemaDir(string $path): void
+    {
+        // Use realpath if the directory already exists, otherwise evaluate the raw path
+        $resolved = realpath($path) ?: $path;
+        // Normalize to forward slashes for cross-platform consistency
+        $resolved = str_replace('\\', '/', rtrim($resolved, '/\\'));
+
+        foreach (self::SENSITIVE_ROOTS as $root) {
+            $root = rtrim($root, '/');
+            if ($resolved === $root || str_starts_with($resolved, $root . '/')) {
+                throw new \RuntimeException(
+                    "FEGA_SCHEMA_DIR '$path' points to a sensitive system directory and cannot be used."
+                );
+            }
+        }
     }
 
     public function getAppDataDirectory(): string
