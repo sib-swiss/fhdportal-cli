@@ -9,7 +9,8 @@
 #   docker run --rm -v $(pwd)/data:/data fega-cli php fega.phar validate /data
 #
 
-FROM php:8.4-cli-alpine
+# Pin to a specific patch version to prevent silent base-image updates
+FROM php:8.4.5-cli-alpine
 
 # Install required dependencies and PHP extensions
 RUN apk add --no-cache libzip-dev libzip && \
