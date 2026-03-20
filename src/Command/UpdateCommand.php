@@ -68,6 +68,10 @@ class UpdateCommand extends Command
                 throw new RuntimeException('Failed to parse API response: ' . json_last_error_msg());
             }
 
+            if (!is_array($data)) {
+                throw new RuntimeException('API response must be a JSON object, got: ' . gettype($data));
+            }
+
             // Extract the schemas
             $schemas = [];
             foreach ($data as $resourceType => $schema) {
@@ -150,6 +154,41 @@ class UpdateCommand extends Command
     }
 
     /**
+     * Validate the structural shape of a downloaded schema
+     *
+     * @throws RuntimeException if the schema fails structural validation
+     */
+    private function validateSchemaShape(string $resourceType, array $schema): void
+    {
+        // Must contain at least one standard JSON Schema root keyword
+        $jsonSchemaKeywords = ['type', 'properties', '$schema', 'allOf', 'anyOf', 'oneOf', 'required', 'definitions', '\$defs'];
+        $hasKeyword = false;
+        foreach ($jsonSchemaKeywords as $keyword) {
+            if (array_key_exists($keyword, $schema)) {
+                $hasKeyword = true;
+                break;
+            }
+        }
+        if (!$hasKeyword) {
+            throw new RuntimeException(
+                "Schema '$resourceType' does not contain any recognised JSON Schema keywords (type, properties, \$schema, …)."
+            );
+        }
+
+        // Must have the FEGA resource envelope
+        if (!isset($schema['x-resource']) || !is_array($schema['x-resource'])) {
+            throw new RuntimeException(
+                "Schema '$resourceType' is missing required 'x-resource' envelope."
+            );
+        }
+        if (!isset($schema['x-resource']['schema']) || !is_array($schema['x-resource']['schema'])) {
+            throw new RuntimeException(
+                "Schema '$resourceType' is missing required 'x-resource.schema' definition."
+            );
+        }
+    }
+
+    /**
      * Create new schema files
      */
     private function createSchemaFiles(array $schemas, SymfonyStyle $io): void
@@ -163,6 +202,10 @@ class UpdateCommand extends Command
             }
 
             $resourceType = $this->sanitizeResourceType($resourceType);
+
+            // Validate the structural shape of the schema
+            $this->validateSchemaShape($resourceType, $schema);
+
             $filePath = $this->schemaDir . '/' . $resourceType . '.json';
 
             // Format the JSON content
