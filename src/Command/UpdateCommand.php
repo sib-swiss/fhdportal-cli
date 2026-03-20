@@ -95,7 +95,7 @@ class UpdateCommand extends Command
         } catch (Throwable $e) {
             // Handle any errors that occurred during the process
             $io->error('Failed to update schemas: ' . $e->getMessage());
-            if ($output->isVerbose()) {
+            if ($output->isDebug()) {
                 $io->text($e->getTraceAsString());
             }
             return Command::FAILURE;
