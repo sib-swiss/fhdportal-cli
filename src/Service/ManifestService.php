@@ -117,6 +117,11 @@ class ManifestService
             throw new Exception("Manifest file not found: $manifestPath");
         }
 
+        // Guard against YAML DoS: reject manifests larger than 1 MB
+        if (filesize($manifestPath) > 1024 * 1024) {
+            throw new Exception("Manifest file is too large (max 1 MB)");
+        }
+
         // Parse the YAML file
         $manifestData = Yaml::parseFile($manifestPath);
 
