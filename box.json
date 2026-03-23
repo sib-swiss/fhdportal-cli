@@ -3,6 +3,7 @@
   "main": "bin/console",
   "directories": ["src", "config", "vendor", "public"],
   "files": ["composer.json"],
+  "blacklist": ["public/index.php"],
   "exclude-composer-files": false,
   "compression": "GZ",
   "compactors": ["KevinGH\\Box\\Compactor\\Php"],
