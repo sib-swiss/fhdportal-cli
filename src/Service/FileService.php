@@ -201,7 +201,7 @@ class FileService
      */
     public function createTempDirectory(): string
     {
-        $tempDirPath = sys_get_temp_dir() . '/' . static::TEMP_DIR_PREFIX . uniqid();
+        $tempDirPath = sys_get_temp_dir() . '/' . static::TEMP_DIR_PREFIX . bin2hex(random_bytes(8));
         $this->filesystem->mkdir($tempDirPath);
 
         return $tempDirPath;
@@ -243,6 +243,6 @@ class FileService
             return false;
         }
 
-        return strpos($tempDirPath, $systemTempDirPath) === 0;
+        return str_starts_with($tempDirPath, $systemTempDirPath . DIRECTORY_SEPARATOR);
     }
 }
