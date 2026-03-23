@@ -196,12 +196,16 @@ class ValidateCommand extends Command
             }
 
             // Clean up
-            unlink($tempFile);
+            if (!unlink($tempFile)) {
+                error_log("Warning: could not remove temp file: $tempFile");
+            }
 
             return $this->outputResult($validationResult, $outputFormat, $io);
         } catch (Exception $e) {
             if (isset($tempFile) && file_exists($tempFile)) {
-                unlink($tempFile);
+                if (!unlink($tempFile)) {
+                    error_log("Warning: could not remove temp file: $tempFile");
+                }
             }
             $io->error($e->getMessage());
             return Command::FAILURE;
