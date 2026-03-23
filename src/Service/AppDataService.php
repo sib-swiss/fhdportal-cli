@@ -40,11 +40,16 @@ class AppDataService
         $resolved = str_replace('\\', '/', rtrim($resolved, '/\\'));
 
         foreach (self::SENSITIVE_ROOTS as $root) {
-            $root = rtrim($root, '/');
-            if ($resolved === $root || str_starts_with($resolved, $root . '/')) {
-                throw new \RuntimeException(
-                    "FEGA_SCHEMA_DIR '$path' points to a sensitive system directory and cannot be used."
-                );
+            // Check against both the raw root and its realpath
+            $rawRoot = rtrim($root, '/');
+            $resolvedRoot = str_replace('\\', '/', rtrim(realpath($root) ?: $root, '/'));
+
+            foreach ([$rawRoot, $resolvedRoot] as $checkRoot) {
+                if ($resolved === $checkRoot || str_starts_with($resolved, $checkRoot . '/')) {
+                    throw new \RuntimeException(
+                        "FEGA_SCHEMA_DIR '$path' points to a sensitive system directory and cannot be used."
+                    );
+                }
             }
         }
     }
