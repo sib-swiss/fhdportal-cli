@@ -43,7 +43,7 @@ class FileService
         $delimiter = ',';
 
         if ($format === 'csv') {
-            $record = str_getcsv($line, "\t");
+            $record = str_getcsv($line, "\t", '"', '');
             if (count($record) > 2) {
                 $delimiter = "\t";
             }
