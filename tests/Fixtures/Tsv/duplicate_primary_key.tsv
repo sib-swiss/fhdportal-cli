@@ -1,0 +1,3 @@
+name	description
+duplicate-study	First occurrence
+duplicate-study	Duplicate primary key — should fail

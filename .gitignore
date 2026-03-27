@@ -22,3 +22,8 @@ fega.phar
 # IDE files
 .vscode/
 ###< project ###
+
+###> phpunit/phpunit ###
+/phpunit.xml
+/.phpunit.cache/
+###< phpunit/phpunit ###

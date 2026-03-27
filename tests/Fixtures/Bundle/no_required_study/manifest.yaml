@@ -1,0 +1,5 @@
+version: 1
+files:
+    -
+        file_name: items.tsv
+        resource_type: Item

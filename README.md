@@ -563,6 +563,44 @@ The following resource types are supported for validation:
 
 ---
 
+## Testing
+
+### Running Tests
+
+```bash
+# Run the full test suite
+php bin/phpunit
+
+# Run with human-readable test names
+php bin/phpunit --testdox
+
+# Run a specific subset by directory
+php bin/phpunit tests/Unit/
+
+# Run a single test class
+php bin/phpunit tests/Security/PathTraversalTest.php
+
+# Filter by test name
+php bin/phpunit --filter testManifestRejectsPathTraversalInFileName
+```
+
+### Test Suite Structure
+
+| Directory | Purpose |
+|-----------|---------|
+| `tests/Unit/Service/` | Unit tests for each service class in isolation |
+| `tests/Integration/Command/` | Integration tests for each command |
+| `tests/Security/` | Security-focused tests verifying input sanitization, path isolation, and resource limits |
+| `tests/Build/` | Build integrity checks: PHP syntax, autoloader, and schema file structure |
+
+### Test Environment
+
+Tests run in the `test` environment defined in `.env.test`. The `FEGA_SCHEMA_DIR` variable is pointed at `tests/Fixtures/Schemas/` so tests are independent of the production schemas.
+
+No additional configuration is required after running `composer install`.
+
+---
+
 ## Development
 
 ### Requirements

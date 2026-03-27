@@ -1,0 +1,51 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "title": "Item",
+    "description": "Secondary schema fixture for foreign-key and constraint testing.",
+    "required": ["id"],
+    "properties": {
+        "id": {
+            "type": "string",
+            "minLength": 1
+        },
+        "study_name": {
+            "type": "string"
+        },
+        "label": {
+            "type": "string"
+        }
+    },
+    "additionalProperties": true,
+    "x-resource": {
+        "schema": {
+            "fields": [
+                {
+                    "name": "id",
+                    "constraints": {
+                        "required": true
+                    }
+                },
+                {
+                    "name": "study_name"
+                },
+                {
+                    "name": "label"
+                }
+            ],
+            "primaryKey": ["id"],
+            "foreignKeys": [
+                {
+                    "fields": ["study_name"],
+                    "reference": {
+                        "resource": "Study",
+                        "fields": ["name"]
+                    }
+                }
+            ],
+            "uniqueKeys": [
+                ["label"]
+            ]
+        }
+    }
+}
