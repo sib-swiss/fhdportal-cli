@@ -56,7 +56,11 @@ build_phar() {
         rm fega.phar
         log "Removed existing PHAR"
     fi
-    
+
+    # Install without dev dependencies
+    log "Installing production dependencies only..."
+    composer install --no-dev --optimize-autoloader --no-interaction
+
     # Build with Box
     box compile
     
@@ -66,8 +70,13 @@ build_phar() {
         log "File size: $(du -h fega.phar | cut -f1)"
     else
         error "✗ PHAR test failed!"
+        composer install --no-interaction
         exit 1
     fi
+
+    # Restore dev dependencies for local development
+    log "Restoring development dependencies..."
+    composer install --no-interaction
 }
 
 # Build platform binaries (with PHPacker)
