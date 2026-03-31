@@ -34,6 +34,13 @@ if (!getenv('FEGA_SCHEMA_DIR')) {
     putenv('FEGA_SCHEMA_DIR=' . $schemaDir);
 }
 
+# Set default API URL if not already configured
+if (!getenv('FEGA_API_URL')) {
+    $apiUrl = 'https://fega-portal-dev.vital-it.ch/api/api/';
+    $_ENV['FEGA_API_URL'] = $apiUrl;
+    putenv('FEGA_API_URL=' . $apiUrl);
+}
+
 Phar::mapPhar('fega.phar');
 
 require_once 'phar://fega.phar/vendor/autoload.php';
