@@ -14,34 +14,13 @@ use RuntimeException;
  */
 class SensitiveDirTest extends TestCase
 {
-    private string $originalEnvValue;
-    private bool $envWasSet;
-
-    protected function setUp(): void
-    {
-        $current = getenv('FEGA_SCHEMA_DIR');
-        $this->envWasSet = ($current !== false);
-        $this->originalEnvValue = $current !== false ? $current : '';
-    }
-
-    protected function tearDown(): void
-    {
-        if ($this->envWasSet) {
-            putenv("FEGA_SCHEMA_DIR={$this->originalEnvValue}");
-        } else {
-            putenv('FEGA_SCHEMA_DIR');
-        }
-    }
-
     #[DataProvider('exactSensitiveRootProvider')]
     public function testExactSensitiveRootIsRejected(string $path): void
     {
-        putenv("FEGA_SCHEMA_DIR={$path}");
-
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessageMatches('/sensitive system directory/i');
 
-        (new AppDataService())->getSchemaDirectory();
+        (new AppDataService($path))->getSchemaDirectory();
     }
 
     /** @return array<string, array{string}> */
@@ -63,12 +42,10 @@ class SensitiveDirTest extends TestCase
     #[DataProvider('sensitiveDirSubpathProvider')]
     public function testSensitiveSubpathIsRejected(string $path): void
     {
-        putenv("FEGA_SCHEMA_DIR={$path}");
-
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessageMatches('/sensitive system directory/i');
 
-        (new AppDataService())->getSchemaDirectory();
+        (new AppDataService($path))->getSchemaDirectory();
     }
 
     /** @return array<string, array{string}> */
@@ -87,10 +64,8 @@ class SensitiveDirTest extends TestCase
     #[DataProvider('safeDirProvider')]
     public function testSafeDirIsNotRejected(string $path): void
     {
-        putenv("FEGA_SCHEMA_DIR={$path}");
-
         try {
-            $result = (new AppDataService())->getSchemaDirectory();
+            $result = (new AppDataService($path))->getSchemaDirectory();
             self::assertSame($path, $result);
         } catch (RuntimeException $e) {
             self::fail("Safe path '{$path}' was unexpectedly rejected: " . $e->getMessage());

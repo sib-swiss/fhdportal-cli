@@ -17,39 +17,17 @@ use RuntimeException;
  */
 class AppDataServiceTest extends TestCase
 {
-    private string $originalEnvValue;
-    private bool $envWasSet;
-
-    protected function setUp(): void
-    {
-        $current = getenv('FEGA_SCHEMA_DIR');
-        $this->envWasSet = ($current !== false);
-        $this->originalEnvValue = $current !== false ? $current : '';
-    }
-
-    protected function tearDown(): void
-    {
-        if ($this->envWasSet) {
-            putenv("FEGA_SCHEMA_DIR={$this->originalEnvValue}");
-        } else {
-            putenv('FEGA_SCHEMA_DIR');
-        }
-    }
-
     public function testGetSchemaDirectoryReturnsEnvVarWhenSet(): void
     {
         $customPath = sys_get_temp_dir() . '/my-schemas';
-        putenv("FEGA_SCHEMA_DIR={$customPath}");
 
-        $service = new AppDataService();
+        $service = new AppDataService($customPath);
         self::assertSame($customPath, $service->getSchemaDirectory());
     }
 
     public function testGetSchemaDirectoryFallsBackToPlatformDirWhenEnvNotSet(): void
     {
-        putenv('FEGA_SCHEMA_DIR'); // unset
-
-        $service = new AppDataService();
+        $service = new AppDataService('');
         $dir = $service->getSchemaDirectory();
 
         // Must not be empty and must end with "schemas"
@@ -60,12 +38,10 @@ class AppDataServiceTest extends TestCase
     #[DataProvider('sensitiveDirProvider')]
     public function testGetSchemaDirectoryRejectsSensitivePath(string $path): void
     {
-        putenv("FEGA_SCHEMA_DIR={$path}");
-
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessageMatches('/sensitive system directory/i');
 
-        (new AppDataService())->getSchemaDirectory();
+        (new AppDataService($path))->getSchemaDirectory();
     }
 
     /** @return array<string, array{string}> */
@@ -89,9 +65,8 @@ class AppDataServiceTest extends TestCase
     public function testGetSchemaDirectoryAllowsNormalUserPath(): void
     {
         $safePath = sys_get_temp_dir() . '/fega-schemas-test-' . bin2hex(random_bytes(4));
-        putenv("FEGA_SCHEMA_DIR={$safePath}");
 
-        $service = new AppDataService();
+        $service = new AppDataService($safePath);
         // Should NOT throw
         self::assertSame($safePath, $service->getSchemaDirectory());
     }
