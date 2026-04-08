@@ -24,7 +24,9 @@ services:
       - '../src/Kernel.php'
 
   # Application Services
-  App\Service\AppDataService: ~
+  App\Service\AppDataService:
+    arguments:
+      $schemaDir: '%app.schema_dir%'
 
   App\Service\FileService:
     arguments:

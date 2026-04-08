@@ -7,19 +7,23 @@ use Symfony\Component\Filesystem\Path;
 class AppDataService
 {
     private string $appName = 'fega';
+    private string $schemaDir;
 
     /**
      * Sensitive root directories that must never be used as a schema store.
      */
     private const SENSITIVE_ROOTS = ['/etc', '/proc', '/sys', '/dev', '/boot', '/bin', '/sbin', '/usr/bin', '/usr/sbin'];
 
+    public function __construct(string $schemaDir = '')
+    {
+        $this->schemaDir = $schemaDir;
+    }
+
     public function getSchemaDirectory(): string
     {
-        // Check if an environment variable is set
-        $envSchemaDir = getenv('FEGA_SCHEMA_DIR');
-        if ($envSchemaDir !== false && $envSchemaDir !== '') {
-            $this->assertSafeSchemaDir($envSchemaDir);
-            return $envSchemaDir;
+        if ($this->schemaDir !== '') {
+            $this->assertSafeSchemaDir($this->schemaDir);
+            return $this->schemaDir;
         }
 
         // Fall back to platform-specific directory
@@ -57,7 +61,7 @@ class AppDataService
     public function getAppDataDirectory(): string
     {
         return match (PHP_OS_FAMILY) {
-            'Darwin' => Path::join(getenv('HOME'), 'Library', 'Application Support', ".{$this->appName}"),
+            'Darwin' => Path::join(getenv('HOME'), 'Library', 'Application Support', $this->appName),
             'Windows' => Path::join(getenv('LOCALAPPDATA'), $this->appName),
             default => Path::join(getenv('HOME'), ".{$this->appName}")
         };
