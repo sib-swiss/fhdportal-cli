@@ -49,11 +49,15 @@
                         "type": "string"
                     },
                     "value": {
-                        "type": "string"
+                        "type": [
+                            "string",
+                            "integer",
+                            "number"
+                        ]
                     }
                 }
             },
-            "description": "Any extra attributes that describes the Run"
+            "description": "Any extra attributes that describe the Run"
         },
         "sample_public_id": {
             "type": "string",
@@ -84,7 +88,7 @@
                             "title": "unit"
                         },
                         "value": {
-                            "type": "numeric",
+                            "type": "number",
                             "title": "value"
                         }
                     }
@@ -105,7 +109,7 @@
                             "title": "unit"
                         },
                         "value": {
-                            "type": "numeric",
+                            "type": "number",
                             "title": "value"
                         }
                     }
@@ -126,7 +130,7 @@
                             "title": "unit"
                         },
                         "value": {
-                            "type": "numeric",
+                            "type": "number",
                             "title": "value"
                         }
                     }
@@ -136,7 +140,7 @@
                     "title": "magnification"
                 }
             },
-            "description": "Physical size of image volume in x,y,z & units (pull down), OR magnification"
+            "description": "Physical size of image volume in x,y,z & units or magnification"
         },
         "dimension_extents": {
             "type": "object",
@@ -177,17 +181,17 @@
         "experimental_status": {
             "type": "string",
             "title": "Experimental status",
-            "description": "Test/ control"
+            "description": "Test/control"
         },
         "format_and_compression": {
             "type": "string",
             "title": "Format & compression",
-            "description": "Primary image/processed image/segmentation"
+            "description": "Image format and compression type"
         },
         "image_processing_method": {
             "type": "string",
             "title": "Image processing method",
-            "description": "Image registration, other processing applied to this dataset"
+            "description": "Processing methods applied to this dataset"
         },
         "contrast_inversion_to_tem": {
             "enum": [
@@ -197,7 +201,7 @@
             ],
             "type": "string",
             "title": "Contrast inversion to TEM",
-            "description": "Y/N; N if stained features result in brighter (whiter) signal; Y if it looks like a TEM image"
+            "description": "Y/N; N if stained features result in brighter signal; Y if it looks like a TEM image"
         },
         "imageexperiment_public_id": {
             "type": "string",
@@ -228,7 +232,7 @@
                             "title": "unit"
                         },
                         "value": {
-                            "type": "numeric",
+                            "type": "number",
                             "title": "value"
                         }
                     }
@@ -249,7 +253,7 @@
                             "title": "unit"
                         },
                         "value": {
-                            "type": "numeric",
+                            "type": "number",
                             "title": "value"
                         }
                     }
@@ -270,7 +274,7 @@
                             "title": "unit"
                         },
                         "value": {
-                            "type": "numeric",
+                            "type": "number",
                             "title": "value"
                         }
                     }
@@ -280,7 +284,7 @@
                     "title": "magnification"
                 }
             },
-            "description": "Physical size of pixels in x, y, z & units"
+            "description": "Physical size of pixels/voxels in x, y, z & units"
         }
     },
     "x-resource": {

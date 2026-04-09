@@ -50,7 +50,7 @@
                 },
                 {
                     "fields": [
-                        "molecularrun_public_ids"
+                        "run_public_ids"
                     ],
                     "reference": {
                         "fields": [
@@ -61,7 +61,7 @@
                 },
                 {
                     "fields": [
-                        "molecularanalysis_public_ids"
+                        "analysis_public_ids"
                     ],
                     "reference": {
                         "fields": [
@@ -89,7 +89,7 @@
         "title",
         "description",
         "dataset_types",
-        "molecularrun_public_ids",
+        "run_public_ids",
         "released_date"
     ],
     "properties": {
@@ -114,27 +114,38 @@
             "type": "array",
             "items": {
                 "enum": [
-                    "Whole genome sequencing",
-                    "Exome sequencing",
-                    "Genotyping by array",
-                    "Transcriptome profiling by high-throughput sequencing",
-                    "Transcriptome profiling by array",
-                    "Amplicon sequencing",
-                    "Methylation binding domain sequencing",
-                    "Methylation profiling by high-throughput sequencing",
-                    "Phenotype information",
-                    "Study summary information",
-                    "Genomic variant calling",
-                    "Chromatin accessibility profiling by high-throughput sequencing",
-                    "Histone modification profiling by high-throughput sequencing",
-                    "Chip-Seq"
+                    "Digital pathology",
+                    "Expansion microscopy",
+                    "Localisation markers",
+                    "Force microscopy",
+                    "Histology",
+                    "Interferometric microscopy",
+                    "Intravital imaging",
+                    "Light field microscopy",
+                    "Mass spectrometry imaging",
+                    "Environmental transmission electron microscopy",
+                    "Point detection microscopy",
+                    "Sample material separation",
+                    "Diffractometry and scattering",
+                    "Label-free imaging"
                 ],
                 "type": "string"
-            }
+            },
+            "x-check": "verticalcheckbox",
+            "uniqueItems": true
         },
         "released_date": {
             "type": "string",
             "format": "date"
+        },
+        "run_public_ids": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "pattern": "^CHFEGAR[0-9]{11}"
+            },
+            "x-check": "ImageRuns",
+            "uniqueItems": true
         },
         "extra_attributes": {
             "type": "array",
@@ -173,26 +184,13 @@
             "x-check_title": "title",
             "x-check_value": "public_id"
         },
-        "molecularrun_public_ids": {
-            "type": "array",
-            "items": {
-                "type": "string",
-                "pattern": "^CHFEGAR[0-9]{11}"
-            },
-            "x-check": "MolecularRun",
-            "x-compact": true,
-            "uniqueItems": true,
-            "x-check_title": "title",
-            "x-check_value": "public_id"
-        },
-        "molecularanalysis_public_ids": {
+        "analysis_public_ids": {
             "type": "array",
             "items": {
                 "type": "string",
                 "pattern": "^CHFEGAZ[0-9]{11}"
             },
-            "x-check": "MolecularAnalysis",
-            "x-compact": true,
+            "x-check": "ImageAnalysis",
             "uniqueItems": true,
             "x-check_title": "title",
             "x-check_value": "public_id"
@@ -227,12 +225,6 @@
                 {
                     "name": "analyses",
                     "type": "list"
-                },
-                {
-                    "name": "released_date",
-                    "constraints": {
-                        "required": true
-                    }
                 }
             ],
             "primaryKey": [
@@ -240,6 +232,7 @@
             ],
             "foreignKeys": [
                 {
+                    "type": "list",
                     "fields": [
                         "runs"
                     ],
@@ -247,7 +240,7 @@
                         "fields": [
                             "title"
                         ],
-                        "resource": "MolecularRun"
+                        "resource": "ImageRun"
                     }
                 },
                 {
@@ -258,7 +251,7 @@
                         "fields": [
                             "title"
                         ],
-                        "resource": "MolecularAnalysis"
+                        "resource": "ImageAnalysis"
                     }
                 }
             ]

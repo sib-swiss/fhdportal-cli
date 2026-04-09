@@ -4,7 +4,6 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "required": [
         "title",
-        "description",
         "analysis_result_type",
         "sdafile_public_ids",
         "analysis_method_and_details",
@@ -20,10 +19,6 @@
             "type": "string",
             "pattern": "^CHFEGAZ[0-9]{11}",
             "description": "Public ID of the analysis"
-        },
-        "description": {
-            "type": "string",
-            "description": "Description of the analysis"
         },
         "extra_attributes": {
             "type": "array",
@@ -42,7 +37,11 @@
                         "type": "string"
                     },
                     "value": {
-                        "type": "string"
+                        "type": [
+                            "string",
+                            "integer",
+                            "number"
+                        ]
                     }
                 }
             },

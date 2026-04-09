@@ -1,6 +1,133 @@
 {
     "type": "object",
     "title": "SampleRequest",
+    "x-cega": {
+        "schema": {
+            "foreignKeys": [
+                {
+                    "fields": [
+                        "title"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "title"
+                        ],
+                        "resource": "samples"
+                    }
+                },
+                {
+                    "fields": [
+                        "alias"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "alias"
+                        ],
+                        "resource": "samples"
+                    }
+                },
+                {
+                    "fields": [
+                        "description"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "description"
+                        ],
+                        "resource": "samples"
+                    }
+                },
+                {
+                    "fields": [
+                        "biological_sex"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "biological_sex"
+                        ],
+                        "resource": "samples"
+                    }
+                },
+                {
+                    "fields": [
+                        "subject_id"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "subject_id"
+                        ],
+                        "resource": "samples"
+                    }
+                },
+                {
+                    "fields": [
+                        "phenotype"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "phenotype"
+                        ],
+                        "resource": "samples"
+                    }
+                },
+                {
+                    "fields": [
+                        "biosample_id"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "biosample_id"
+                        ],
+                        "resource": "samples"
+                    }
+                },
+                {
+                    "fields": [
+                        "case_control"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "case_control"
+                        ],
+                        "resource": "samples"
+                    }
+                },
+                {
+                    "fields": [
+                        "organism_part"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "organism_part"
+                        ],
+                        "resource": "samples"
+                    }
+                },
+                {
+                    "fields": [
+                        "cell_line"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "cell_line"
+                        ],
+                        "resource": "samples"
+                    }
+                },
+                {
+                    "fields": [
+                        "extra_attributes"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "extra_attributes"
+                        ],
+                        "resource": "samples"
+                    }
+                }
+            ]
+        }
+    },
     "$schema": "http://json-schema.org/draft-07/schema#",
     "required": [
         "alias",
@@ -82,7 +209,11 @@
                         "type": "string"
                     },
                     "value": {
-                        "type": "string"
+                        "type": [
+                            "string",
+                            "integer",
+                            "number"
+                        ]
                     }
                 }
             }
@@ -93,6 +224,12 @@
             "fields": [
                 {
                     "name": "alias",
+                    "constraints": {
+                        "required": true
+                    }
+                },
+                {
+                    "name": "title",
                     "constraints": {
                         "required": true
                     }

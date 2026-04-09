@@ -1,6 +1,67 @@
 {
     "type": "object",
     "title": "RunRequest",
+    "x-cega": {
+        "schema": {
+            "foreignKeys": [
+                {
+                    "fields": [
+                        "run_file_type"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "run_file_type"
+                        ],
+                        "resource": "runs"
+                    }
+                },
+                {
+                    "fields": [
+                        "molecularexperiment_public_id"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "experiment_provisional_id"
+                        ],
+                        "resource": "runs"
+                    }
+                },
+                {
+                    "fields": [
+                        "sample_public_id"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "sample_provisional_id"
+                        ],
+                        "resource": "runs"
+                    }
+                },
+                {
+                    "fields": [
+                        "sdafile_public_ids"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "files"
+                        ],
+                        "resource": "runs"
+                    }
+                },
+                {
+                    "fields": [
+                        "extra_attributes"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "extra_attributes"
+                        ],
+                        "resource": "runs"
+                    }
+                }
+            ]
+        }
+    },
     "$schema": "http://json-schema.org/draft-07/schema#",
     "required": [
         "title",
@@ -55,7 +116,11 @@
                         "type": "string"
                     },
                     "value": {
-                        "type": "string"
+                        "type": [
+                            "string",
+                            "integer",
+                            "number"
+                        ]
                     }
                 }
             },
@@ -103,10 +168,16 @@
                     }
                 },
                 {
-                    "name": "experiment"
+                    "name": "experiment",
+                    "constraints": {
+                        "required": true
+                    }
                 },
                 {
-                    "name": "sample"
+                    "name": "sample",
+                    "constraints": {
+                        "required": true
+                    }
                 },
                 {
                     "name": "files",

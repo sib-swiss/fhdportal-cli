@@ -1,6 +1,144 @@
 {
     "type": "object",
     "title": "ExperimentRequest",
+    "x-cega": {
+        "schema": {
+            "foreignKeys": [
+                {
+                    "fields": [
+                        "design_description"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "design_description"
+                        ],
+                        "resource": "experiments"
+                    }
+                },
+                {
+                    "fields": [
+                        "library_name"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "library_name"
+                        ],
+                        "resource": "experiments"
+                    }
+                },
+                {
+                    "fields": [
+                        "library_construction_protocol"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "library_construction_protocol"
+                        ],
+                        "resource": "experiments"
+                    }
+                },
+                {
+                    "fields": [
+                        "paired_nominal_length"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "paired_nominal_length"
+                        ],
+                        "resource": "experiments"
+                    }
+                },
+                {
+                    "fields": [
+                        "paired_nominal_sdev"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "paired_nominal_sdev"
+                        ],
+                        "resource": "experiments"
+                    }
+                },
+                {
+                    "fields": [
+                        "instrument_model_id"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "instrument_model_id"
+                        ],
+                        "resource": "experiments"
+                    }
+                },
+                {
+                    "fields": [
+                        "library_layout"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "library_layout"
+                        ],
+                        "resource": "experiments"
+                    }
+                },
+                {
+                    "fields": [
+                        "library_strategy"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "library_strategy"
+                        ],
+                        "resource": "experiments"
+                    }
+                },
+                {
+                    "fields": [
+                        "library_source"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "library_source"
+                        ],
+                        "resource": "experiments"
+                    }
+                },
+                {
+                    "fields": [
+                        "library_selection"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "library_selection"
+                        ],
+                        "resource": "experiments"
+                    }
+                },
+                {
+                    "fields": [
+                        "study_provisional_id"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "study_provisional_id"
+                        ],
+                        "resource": "experiments"
+                    }
+                },
+                {
+                    "fields": [
+                        "extra_attributes"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "extra_attributes"
+                        ],
+                        "resource": "experiments"
+                    }
+                }
+            ]
+        }
+    },
     "$schema": "http://json-schema.org/draft-07/schema#",
     "required": [
         "title",
@@ -70,7 +208,11 @@
                         "type": "string"
                     },
                     "value": {
-                        "type": "string"
+                        "type": [
+                            "string",
+                            "integer",
+                            "number"
+                        ]
                     }
                 }
             },

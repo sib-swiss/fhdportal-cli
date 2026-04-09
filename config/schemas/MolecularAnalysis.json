@@ -1,6 +1,144 @@
 {
     "type": "object",
     "title": "AnalysisRequest",
+    "x-cega": {
+        "schema": {
+            "foreignKeys": [
+                {
+                    "fields": [
+                        "title"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "title"
+                        ],
+                        "resource": "analyses"
+                    }
+                },
+                {
+                    "fields": [
+                        "description"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "description"
+                        ],
+                        "resource": "analyses"
+                    }
+                },
+                {
+                    "fields": [
+                        "analysis_type"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "analysis_type"
+                        ],
+                        "resource": "analyses"
+                    }
+                },
+                {
+                    "fields": [
+                        "genome_id"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "genome_id"
+                        ],
+                        "resource": "analyses"
+                    }
+                },
+                {
+                    "fields": [
+                        "platform"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "platform"
+                        ],
+                        "resource": "analyses"
+                    }
+                },
+                {
+                    "fields": [
+                        "study_provisional_id"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "study_provisional_id"
+                        ],
+                        "resource": "analyses"
+                    }
+                },
+                {
+                    "fields": [
+                        "molecularexperiment_public_ids"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "experiment_provisional_ids"
+                        ],
+                        "resource": "analyses"
+                    }
+                },
+                {
+                    "fields": [
+                        "sample_public_ids"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "sample_provisional_ids"
+                        ],
+                        "resource": "analyses"
+                    }
+                },
+                {
+                    "fields": [
+                        "experiment_types"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "experiment_types"
+                        ],
+                        "resource": "analyses"
+                    }
+                },
+                {
+                    "fields": [
+                        "chromosomes"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "chromosomes"
+                        ],
+                        "resource": "analyses"
+                    }
+                },
+                {
+                    "fields": [
+                        "sdafile_public_ids"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "files"
+                        ],
+                        "resource": "analyses"
+                    }
+                },
+                {
+                    "fields": [
+                        "extra_attributes"
+                    ],
+                    "reference": {
+                        "fields": [
+                            "extra_attributes"
+                        ],
+                        "resource": "analyses"
+                    }
+                }
+            ]
+        }
+    },
     "$schema": "http://json-schema.org/draft-07/schema#",
     "required": [
         "title",
@@ -555,7 +693,6 @@
                     "Whole genome sequencing",
                     "Exome sequencing",
                     "Transcriptomics",
-                    "transcriptomics",
                     "Genotyping by sequencing",
                     "Whole transcriptome sequencing",
                     "Genotyping by Array",
@@ -583,7 +720,11 @@
                         "type": "string"
                     },
                     "value": {
-                        "type": "string"
+                        "type": [
+                            "string",
+                            "integer",
+                            "number"
+                        ]
                     }
                 }
             },

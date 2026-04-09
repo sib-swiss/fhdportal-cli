@@ -111,7 +111,8 @@
                 "RNASeq",
                 "Exome Sequencing",
                 "Pooled Clone Sequencing",
-                "Transcriptome Sequencing"
+                "Transcriptome Sequencing",
+                "Tissue Imaging"
             ],
             "type": "string"
         },
@@ -153,7 +154,11 @@
                         "type": "string"
                     },
                     "value": {
-                        "type": "string"
+                        "type": [
+                            "string",
+                            "integer",
+                            "number"
+                        ]
                     }
                 }
             }
