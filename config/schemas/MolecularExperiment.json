@@ -398,6 +398,7 @@
             ],
             "type": "string",
             "title": "Instrument",
+            "x-renderer": "instrument-model",
             "description": "Model of the instrument to perform the molecular analysis (sequencer)"
         },
         "paired_nominal_sdev": {

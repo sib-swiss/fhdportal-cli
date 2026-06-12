@@ -318,11 +318,79 @@
                     }
                 },
                 {
-                    "name": "file_type",
-                    "aliasOf": "run_file_type",
+                    "name": "type",
                     "constraints": {
                         "required": true
                     }
+                },
+                {
+                    "name": "format_and_compression",
+                    "constraints": {
+                        "required": true
+                    }
+                },
+                {
+                    "name": "image_processing_method"
+                },
+                {
+                    "name": "contrast_inversion_to_tem"
+                },
+                {
+                    "name": "qc_info"
+                },
+                {
+                    "name": "dimension_extents.x",
+                    "type": "integer"
+                },
+                {
+                    "name": "dimension_extents.y",
+                    "type": "integer"
+                },
+                {
+                    "name": "dimension_extents.z",
+                    "type": "integer"
+                },
+                {
+                    "name": "size_description.x.value",
+                    "type": "number"
+                },
+                {
+                    "name": "size_description.x.unit"
+                },
+                {
+                    "name": "size_description.y.value",
+                    "type": "number"
+                },
+                {
+                    "name": "size_description.y.unit"
+                },
+                {
+                    "name": "size_description.z.value",
+                    "type": "number"
+                },
+                {
+                    "name": "size_description.z.unit"
+                },
+                {
+                    "name": "pixel_voxel_size_description.x.value",
+                    "type": "number"
+                },
+                {
+                    "name": "pixel_voxel_size_description.x.unit"
+                },
+                {
+                    "name": "pixel_voxel_size_description.y.value",
+                    "type": "number"
+                },
+                {
+                    "name": "pixel_voxel_size_description.y.unit"
+                },
+                {
+                    "name": "pixel_voxel_size_description.z.value",
+                    "type": "number"
+                },
+                {
+                    "name": "pixel_voxel_size_description.z.unit"
                 }
             ],
             "primaryKey": [
@@ -337,7 +405,7 @@
                         "fields": [
                             "title"
                         ],
-                        "resource": "MolecularExperiment"
+                        "resource": "ImageExperiment"
                     }
                 },
                 {

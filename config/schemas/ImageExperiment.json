@@ -98,6 +98,21 @@
                     "constraints": {
                         "required": true
                     }
+                },
+                {
+                    "name": "signal_contrast_mechanism"
+                },
+                {
+                    "name": "instrument_attributes"
+                },
+                {
+                    "name": "image_acquisition_parameters"
+                },
+                {
+                    "name": "channels[0].channel_content"
+                },
+                {
+                    "name": "channels[0].channel_biological_entity"
                 }
             ],
             "primaryKey": [

@@ -4,6 +4,7 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "required": [
         "title",
+        "description",
         "analysis_result_type",
         "sdafile_public_ids",
         "analysis_method_and_details",
@@ -19,6 +20,10 @@
             "type": "string",
             "pattern": "^CHFEGAZ[0-9]{11}",
             "description": "Public ID of the analysis"
+        },
+        "description": {
+            "type": "string",
+            "description": "Description of the analysis"
         },
         "extra_attributes": {
             "type": "array",
@@ -96,6 +101,10 @@
         "schema": {
             "fields": [
                 {
+                    "name": "sample",
+                    "type": "string"
+                },
+                {
                     "name": "files",
                     "type": "list",
                     "aliasOf": "sdafile_public_ids",
@@ -111,13 +120,11 @@
                     }
                 },
                 {
-                    "name": "title",
-                    "constraints": {
-                        "required": true
-                    }
+                    "name": "image_experiment",
+                    "type": "string"
                 },
                 {
-                    "name": "analysis_method_and_details",
+                    "name": "title",
                     "constraints": {
                         "required": true
                     }
@@ -135,12 +142,10 @@
                     }
                 },
                 {
-                    "name": "samples",
-                    "type": "list"
-                },
-                {
-                    "name": "experiments",
-                    "type": "list"
+                    "name": "analysis_method_and_details",
+                    "constraints": {
+                        "required": true
+                    }
                 }
             ],
             "primaryKey": [
@@ -149,7 +154,7 @@
             "foreignKeys": [
                 {
                     "fields": [
-                        "samples"
+                        "sample"
                     ],
                     "reference": {
                         "fields": [
@@ -160,7 +165,7 @@
                 },
                 {
                     "fields": [
-                        "experiments"
+                        "image_experiment"
                     ],
                     "reference": {
                         "fields": [
