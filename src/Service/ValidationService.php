@@ -213,6 +213,22 @@ class ValidationService
         $header = str_getcsv(array_shift($lines), $delimiter, '"', '\\');
         $header = array_map('trim', $header);
 
+        // Validate column names — dots and brackets are structural characters
+        foreach ($header as $columnName) {
+            if (!$this->schemaService->isValidColumnName($columnName)) {
+                return [
+                    'status' => 'FAIL',
+                    'message' => "Invalid column name: '$columnName'. Column names must be identifiers or use structured notation.",
+                ];
+            }
+        }
+
+        // Validate that array indices in column names are sequential
+        $arrayIndexError = $this->schemaService->findColumnArrayIndexGaps($header);
+        if ($arrayIndexError !== null) {
+            return ['status' => 'FAIL', 'message' => $arrayIndexError];
+        }
+
         // Get the table schema for the resource type
         $tableSchema = $this->schemaService->getTableSchema($resourceType) ?? [];
 

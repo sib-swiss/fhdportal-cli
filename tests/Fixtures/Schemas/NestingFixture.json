@@ -1,0 +1,56 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "title": "NestingFixture",
+    "description": "Minimal fixture schema for testing structured column names support.",
+    "required": ["title"],
+    "additionalProperties": true,
+    "properties": {
+        "title": {
+            "type": "string"
+        },
+        "channels": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "channel_content": {"type": "string"},
+                    "channel_biological_entity": {"type": "string"}
+                }
+            }
+        },
+        "dimension_extents": {
+            "type": "object",
+            "properties": {
+                "x": {"type": "integer"},
+                "y": {"type": "integer"},
+                "z": {"type": "integer"}
+            }
+        },
+        "size_description": {
+            "type": "object",
+            "properties": {
+                "x": {
+                    "type": "object",
+                    "properties": {
+                        "value": {"type": "number"},
+                        "unit": {"type": "string"}
+                    }
+                }
+            }
+        }
+    },
+    "x-resource": {
+        "schema": {
+            "fields": [
+                {
+                    "name": "title",
+                    "constraints": {
+                        "required": true
+                    }
+                }
+            ],
+            "primaryKey": ["title"]
+        }
+    }
+}

@@ -508,7 +508,7 @@ class SchemaService
                         $mappedData[$columnName] = $convertedValue;
                     }
                 }
-                return $mappedData;
+                return $this->unflattenFields($mappedData);
             }
             return $originalData;
         }
@@ -564,7 +564,52 @@ class SchemaService
             }
         }
 
-        return $mappedData;
+        return $this->unflattenFields($mappedData);
+    }
+
+    /**
+     * Validate that a column name is a safe identifier
+     */
+    public function isValidColumnName(string $name): bool
+    {
+        return (bool) preg_match(
+            '/^[a-zA-Z_][a-zA-Z0-9_-]*(\[\d{1,4}\])?(\.[a-zA-Z_][a-zA-Z0-9_-]*(\[\d{1,4}\])?)*$/',
+            $name
+        );
+    }
+
+    /**
+     * Check that arrays referenced in structured column names use consecutive indices
+     */
+    public function findColumnArrayIndexGaps(array $columnNames): ?string
+    {
+        $arrayIndices = [];
+
+        foreach ($columnNames as $colName) {
+            preg_match_all('/\[(\d+)\]/', $colName, $matches, PREG_OFFSET_CAPTURE);
+            foreach ($matches[0] as $k => $match) {
+                $prefix = substr($colName, 0, $match[1]);
+                $arrayIndices[$prefix][] = (int) $matches[1][$k][0];
+            }
+        }
+
+        foreach ($arrayIndices as $path => $indices) {
+            $unique = array_values(array_unique($indices));
+            sort($unique);
+            $max = max($unique);
+            $expected = range(0, $max);
+            if ($unique !== $expected) {
+                $missing = array_values(array_diff($expected, $unique));
+                return sprintf(
+                    "Array '%s' has non-sequential indices [%s]; missing [%s]. Array column indices must start at 0 and be consecutive.",
+                    $path,
+                    implode(', ', $unique),
+                    implode(', ', $missing)
+                );
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -588,6 +633,58 @@ class SchemaService
             // Return a single-element array for other types
             return [$value];
         }
+    }
+
+    /**
+     * Parse a structured column name into an ordered path of string keys and integer array indices
+     */
+    private function parseFieldPath(string $key): array
+    {
+        if (strpos($key, '.') === false && strpos($key, '[') === false) {
+            return [$key];
+        }
+        $path = [];
+        preg_match_all('/([^.\[\]]+)|\[(\d+)\]/', $key, $matches, PREG_SET_ORDER);
+        foreach ($matches as $match) {
+            $path[] = ($match[0][0] === '[') ? (int) $match[2] : $match[1];
+        }
+        return $path;
+    }
+
+    /**
+     * Set a value at the given path inside a nested array, creating intermediate arrays as needed
+     */
+    private function setNestedValue(array &$data, array $path, mixed $value): void
+    {
+        $current = &$data;
+        $lastIndex = count($path) - 1;
+        foreach ($path as $i => $segment) {
+            if ($i === $lastIndex) {
+                $current[$segment] = $value;
+            } else {
+                if (!isset($current[$segment]) || !is_array($current[$segment])) {
+                    $current[$segment] = [];
+                }
+                $current = &$current[$segment];
+            }
+        }
+    }
+
+    /**
+     * Transform a flat array whose keys may use structured notation into a properly nested PHP array
+     */
+    private function unflattenFields(array $flatData): array
+    {
+        $result = [];
+        foreach ($flatData as $key => $value) {
+            $path = $this->parseFieldPath($key);
+            if (count($path) === 1) {
+                $result[$key] = $value;
+            } else {
+                $this->setNestedValue($result, $path, $value);
+            }
+        }
+        return $result;
     }
 
     /**

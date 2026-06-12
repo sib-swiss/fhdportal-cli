@@ -252,4 +252,145 @@ class SchemaServiceTest extends TestCase
         self::assertSame('list', $types['tags']);
         self::assertSame('string', $types['plain']);
     }
+
+    public function testMapFieldsWithDotNotationBuildsNestedObject(): void
+    {
+        $tableSchema = $this->service->getTableSchema('NestingFixture');
+        $input = [
+            'title'                => 'run-001',
+            'dimension_extents.x'  => '1024',
+            'dimension_extents.y'  => '768',
+        ];
+
+        $result = $this->service->mapFields($input, $tableSchema, 'NestingFixture');
+
+        self::assertSame('run-001', $result['title']);
+        self::assertIsArray($result['dimension_extents']);
+        self::assertSame(1024, $result['dimension_extents']['x']);
+        self::assertSame(768, $result['dimension_extents']['y']);
+        self::assertArrayNotHasKey('dimension_extents.x', $result);
+    }
+
+    public function testMapFieldsWithBracketNotationBuildsArray(): void
+    {
+        $tableSchema = $this->service->getTableSchema('NestingFixture');
+        $input = [
+            'title'                               => 'exp-001',
+            'channels[0].channel_content'         => 'OPAL 620',
+            'channels[0].channel_biological_entity' => 'CD11c',
+            'channels[1].channel_content'         => 'OPAL 520',
+            'channels[1].channel_biological_entity' => 'CD163',
+        ];
+
+        $result = $this->service->mapFields($input, $tableSchema, 'NestingFixture');
+
+        self::assertIsArray($result['channels']);
+        self::assertCount(2, $result['channels']);
+        self::assertSame('OPAL 620', $result['channels'][0]['channel_content']);
+        self::assertSame('CD11c', $result['channels'][0]['channel_biological_entity']);
+        self::assertSame('OPAL 520', $result['channels'][1]['channel_content']);
+        self::assertStringStartsWith('[', json_encode($result['channels']));
+    }
+
+    public function testMapFieldsWithDeepNestingBuildsDeepObject(): void
+    {
+        $tableSchema = $this->service->getTableSchema('NestingFixture');
+        $input = [
+            'title'                       => 'run-deep',
+            'size_description.x.value'    => '14.76',
+            'size_description.x.unit'     => 'µm',
+        ];
+
+        $result = $this->service->mapFields($input, $tableSchema, 'NestingFixture');
+
+        self::assertIsArray($result['size_description']);
+        self::assertIsArray($result['size_description']['x']);
+        self::assertSame(14.76, $result['size_description']['x']['value']);
+        self::assertSame('µm', $result['size_description']['x']['unit']);
+    }
+
+    public function testMapFieldsPlainFieldsUnaffectedByUnflattening(): void
+    {
+        $tableSchema = $this->service->getTableSchema('Study');
+        $input = ['name' => 'study-001', 'description' => 'A study'];
+
+        $result = $this->service->mapFields($input, $tableSchema, 'Study');
+
+        self::assertSame('study-001', $result['name']);
+        self::assertSame('A study', $result['description']);
+        self::assertCount(2, $result);
+    }
+
+    #[DataProvider('validColumnNameProvider')]
+    public function testIsValidColumnNameAcceptsValidNames(string $name): void
+    {
+        self::assertTrue($this->service->isValidColumnName($name));
+    }
+
+    /** @return array<string, array{string}> */
+    public static function validColumnNameProvider(): array
+    {
+        return [
+            'plain'                   => ['title'],
+            'underscore'              => ['study_id'],
+            'hyphen'                  => ['format-and-compression'],
+            'structured dot'          => ['dimension_extents.x'],
+            'structured deep dot'     => ['size_description.x.value'],
+            'structured bracket'      => ['channels[0].channel_content'],
+            'bracket only'            => ['arr[0]'],
+            'max index'               => ['arr[9999].field'],
+            'single char'             => ['x'],
+        ];
+    }
+
+    #[DataProvider('invalidColumnNameProvider')]
+    public function testIsValidColumnNameRejectsInvalidNames(string $name): void
+    {
+        self::assertFalse($this->service->isValidColumnName($name));
+    }
+
+    /** @return array<string, array{string}> */
+    public static function invalidColumnNameProvider(): array
+    {
+        return [
+            'empty'            => [''],
+            'path traversal'   => ['../etc/passwd'],
+            'spaces'           => ['name with spaces'],
+            'index too large'  => ['arr[99999].x'],
+            'template inject'  => ['${injection}'],
+            'leading dot'      => ['.field'],
+            'trailing dot'     => ['field.'],
+            'bracket start'    => ['[0].field'],
+            'digit start'      => ['0field'],
+        ];
+    }
+
+    public function testFindColumnArrayIndexGapsReturnsNullForSequentialIndices(): void
+    {
+        $header = [
+            'title',
+            'channels[0].channel_content',
+            'channels[0].channel_biological_entity',
+            'channels[1].channel_content',
+            'channels[1].channel_biological_entity',
+            'channels[2].channel_content',
+        ];
+
+        self::assertNull($this->service->findColumnArrayIndexGaps($header));
+    }
+
+    public function testFindColumnArrayIndexGapsReturnsErrorForGap(): void
+    {
+        $header = [
+            'title',
+            'channels[0].channel_content',
+            'channels[2].channel_content',
+        ];
+
+        $error = $this->service->findColumnArrayIndexGaps($header);
+
+        self::assertNotNull($error);
+        self::assertStringContainsString('channels', $error);
+        self::assertStringContainsString('1', $error);
+    }
 }
