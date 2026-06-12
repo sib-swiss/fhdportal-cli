@@ -563,6 +563,67 @@ The following resource types are supported for validation:
 
 ---
 
+## Structured Column Names
+
+TSV template files support **nested objects** and **arrays** using structured column name notation. This allows tabular files to represent complex, hierarchical data that maps directly to the JSON schema.
+
+### Dot Notation — Nested Objects
+
+Use dots to represent properties of a nested object:
+
+```
+dimension_extents.x    dimension_extents.y    dimension_extents.z
+32640                  28416                  0
+```
+
+Maps to JSON:
+```json
+{
+  "dimension_extents": { "x": 32640, "y": 28416, "z": 0 }
+}
+```
+
+Dots can be chained for deeper nesting:
+
+```
+size_description.x.value    size_description.x.unit
+14758.5                     µm
+```
+
+Maps to JSON:
+```json
+{
+  "size_description": { "x": { "value": 14758.5, "unit": "µm" } }
+}
+```
+
+### Bracket Notation — Arrays
+
+Use `[n]` to represent items in an array (zero-based index):
+
+```
+channels[0].channel_content    channels[0].channel_biological_entity
+OPAL 620                       CD11c
+```
+
+Maps to JSON:
+```json
+{
+  "channels": [
+    { "channel_content": "OPAL 620", "channel_biological_entity": "CD11c" }
+  ]
+}
+```
+
+To add more array items, duplicate the columns and increment the index:
+
+```
+channels[0].channel_content    channels[0].channel_biological_entity    channels[1].channel_content    channels[1].channel_biological_entity
+OPAL 620                       CD11c                                    OPAL 520                       CD163
+```
+
+---
+
 ## Testing
 
 ### Running Tests

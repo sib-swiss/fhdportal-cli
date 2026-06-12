@@ -393,4 +393,51 @@ class SchemaServiceTest extends TestCase
         self::assertStringContainsString('channels', $error);
         self::assertStringContainsString('1', $error);
     }
+
+    public function testGetFieldDetailsForFlatProperty(): void
+    {
+        $resourceSchema = $this->service->getResourceSchema('NestingFixture');
+        $field = ['name' => 'title'];
+        $details = $this->service->getFieldDetails($resourceSchema, $field, 'title');
+
+        self::assertSame('string', $details['type']);
+    }
+
+    public function testGetFieldDetailsForNestedObjectProperty(): void
+    {
+        $resourceSchema = $this->service->getResourceSchema('NestingFixture');
+        $field = ['name' => 'dimension_extents.x'];
+        $details = $this->service->getFieldDetails($resourceSchema, $field, 'dimension_extents.x');
+
+        self::assertSame('integer', $details['type']);
+    }
+
+    public function testGetFieldDetailsForDeeplyNestedObjectProperty(): void
+    {
+        $resourceSchema = $this->service->getResourceSchema('NestingFixture');
+        $field = ['name' => 'size_description.x.value'];
+        $details = $this->service->getFieldDetails($resourceSchema, $field, 'size_description.x.value');
+
+        self::assertSame('number', $details['type']);
+    }
+
+    public function testGetFieldDetailsForArrayBracketProperty(): void
+    {
+        $resourceSchema = $this->service->getResourceSchema('NestingFixture');
+        $field = ['name' => 'channels[0].channel_content'];
+        $details = $this->service->getFieldDetails($resourceSchema, $field, 'channels[0].channel_content');
+
+        self::assertSame('string', $details['type']);
+    }
+
+    public function testGetFieldDetailsForUnknownNestedPathReturnsDefaults(): void
+    {
+        $resourceSchema = $this->service->getResourceSchema('NestingFixture');
+        $field = ['name' => 'nonexistent.deep.path'];
+        $details = $this->service->getFieldDetails($resourceSchema, $field, 'nonexistent.deep.path');
+
+        self::assertSame('string', $details['type']);
+        self::assertSame('', $details['description']);
+        self::assertSame('', $details['constraints']);
+    }
 }

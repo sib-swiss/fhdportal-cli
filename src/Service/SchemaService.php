@@ -997,6 +997,54 @@ class SchemaService
     }
 
     /**
+     * Resolve a property definition for a potentially nested field path from the root properties map.
+     * Handles dot-notation (objects) and bracket-notation (arrays).
+     */
+    private function resolveNestedProperty(array $properties, string $fieldPath): ?array
+    {
+        $path = $this->parseFieldPath($fieldPath);
+
+        if (count($path) === 1) {
+            return $properties[$path[0]] ?? null;
+        }
+
+        $current = $properties;
+
+        foreach ($path as $i => $part) {
+            $isLast = ($i === count($path) - 1);
+
+            if (is_int($part)) {
+                if (!isset($current['items'])) {
+                    return null;
+                }
+                $current = $current['items'];
+                if (!$isLast && isset($current['properties'])) {
+                    $current = $current['properties'];
+                }
+            } else {
+                if (!is_array($current) || !isset($current[$part])) {
+                    return null;
+                }
+                $property = $current[$part];
+
+                if ($isLast) {
+                    return $property;
+                }
+
+                if (isset($property['properties'])) {
+                    $current = $property['properties'];
+                } elseif (isset($property['type']) && $property['type'] === 'array') {
+                    $current = $property;
+                } else {
+                    return null;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Extract field details from the JSON schema
      */
     public function getFieldDetails(array $resourceSchema, array $field, string $fieldName, bool $isPrimaryKey = false): array
@@ -1015,11 +1063,10 @@ class SchemaService
         $properties = $resourceSchema['schema']['properties'];
         $schemaFieldName = $this->getSchemaFieldName($field, $fieldName);
 
-        if (!isset($properties[$schemaFieldName])) {
+        $property = $this->resolveNestedProperty($properties, $schemaFieldName);
+        if ($property === null) {
             return $details;
         }
-
-        $property = $properties[$schemaFieldName];
 
         // Extract field details using helper methods
         $details['type'] = $this->extractFieldType($property);
