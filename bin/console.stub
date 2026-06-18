@@ -36,7 +36,7 @@ if (!getenv('FEGA_SCHEMA_DIR')) {
 
 # Set default API URL if not already configured
 if (!getenv('FEGA_API_URL')) {
-    $apiUrl = 'https://fega-portal-dev.vital-it.ch/api/api/';
+    $apiUrl = 'https://fhd-portal-dev.fega.swiss/api/api/';
     $_ENV['FEGA_API_URL'] = $apiUrl;
     putenv('FEGA_API_URL=' . $apiUrl);
 }
