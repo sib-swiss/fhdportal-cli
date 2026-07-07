@@ -11,6 +11,12 @@ use RuntimeException;
 
 class ValidationService
 {
+    /**
+     * Maximum file size, in bytes, for JSON/CSV/TSV file-argument inputs
+     * (mirrors the 50 MB STDIN cap in ValidateCommand).
+     */
+    public const MAX_FILE_BYTES = 50 * 1024 * 1024;
+
     private FileService $fileService;
     private ManifestService $manifestService;
     private SchemaService $schemaService;
@@ -42,6 +48,19 @@ class ValidationService
                     'message' => "Unsupported file format: $extension"
                 ];
             }
+
+            $fileSize = @filesize($filePath);
+            if ($fileSize !== false && $fileSize > self::MAX_FILE_BYTES) {
+                return [
+                    'status' => 'FAIL',
+                    'message' => sprintf(
+                        'File is too large (%.1f MB > %.0f MB limit)',
+                        $fileSize / (1024 * 1024),
+                        self::MAX_FILE_BYTES / (1024 * 1024)
+                    ),
+                ];
+            }
+
             $content = file_get_contents($filePath);
             $data = json_decode($content);
         } else {
@@ -191,6 +210,18 @@ class ValidationService
             return [
                 'status' => 'FAIL',
                 'message' => "Expected a CSV/TSV file, got $extension",
+            ];
+        }
+
+        $fileSize = @filesize($filePath);
+        if ($fileSize !== false && $fileSize > self::MAX_FILE_BYTES) {
+            return [
+                'status' => 'FAIL',
+                'message' => sprintf(
+                    'File is too large (%.1f MB > %.0f MB limit)',
+                    $fileSize / (1024 * 1024),
+                    self::MAX_FILE_BYTES / (1024 * 1024)
+                ),
             ];
         }
 

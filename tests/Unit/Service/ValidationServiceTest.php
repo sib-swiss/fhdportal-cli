@@ -192,6 +192,40 @@ class ValidationServiceTest extends TestCase
         self::assertStringContainsString('Invalid JSON', (string) $result['message']);
     }
 
+    public function testValidateResourceFailsGracefullyForOversizedJsonFile(): void
+    {
+        $path = sys_get_temp_dir() . '/fega-oversized-' . bin2hex(random_bytes(6)) . '.json';
+        $handle = fopen($path, 'wb');
+        // Sparse file: filesize() reports the logical size instantly, without
+        // writing real bytes, so this test stays fast.
+        ftruncate($handle, ValidationService::MAX_FILE_BYTES + 1024);
+        fclose($handle);
+
+        try {
+            $result = $this->service->validateResource($path, 'Study');
+            self::assertSame('FAIL', $result['status']);
+            self::assertStringContainsString('too large', strtolower((string) $result['message']));
+        } finally {
+            unlink($path);
+        }
+    }
+
+    public function testValidateResourcesFailsGracefullyForOversizedTsvFile(): void
+    {
+        $path = sys_get_temp_dir() . '/fega-oversized-' . bin2hex(random_bytes(6)) . '.tsv';
+        $handle = fopen($path, 'wb');
+        ftruncate($handle, ValidationService::MAX_FILE_BYTES + 1024);
+        fclose($handle);
+
+        try {
+            $result = $this->service->validateResources($path, 'Study');
+            self::assertSame('FAIL', $result['status']);
+            self::assertStringContainsString('too large', strtolower((string) $result['message']));
+        } finally {
+            unlink($path);
+        }
+    }
+
     private function makeNullIo(): SymfonyStyle
     {
         return new SymfonyStyle(new ArrayInput([]), new BufferedOutput());
