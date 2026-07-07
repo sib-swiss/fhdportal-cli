@@ -15,6 +15,15 @@ class FileService
 {
     public const TEMP_DIR_PREFIX = 'fega-';
 
+    /** Maximum number of entries permitted in a ZIP archive (DoS guard). */
+    public const MAX_ENTRIES = 10_000;
+
+    /** Maximum total uncompressed size permitted, in bytes (512 MB). */
+    public const MAX_TOTAL_BYTES = 512 * 1024 * 1024;
+
+    /** Maximum uncompressed/compressed ratio permitted per entry (zip-bomb guard). */
+    public const MAX_RATIO = 200;
+
     private Filesystem $filesystem;
 
     public function __construct(Filesystem $filesystem)
@@ -153,8 +162,19 @@ class FileService
             throw new RuntimeException("Failed to open archive: $filePath");
         }
 
-        // Zip-slip protection: validate every entry before extracting
+        // Reject archives with an excessive number of entries before doing any work
+        if ($archive->numFiles > self::MAX_ENTRIES) {
+            $archive->close();
+            $this->filesystem->remove($tempDirPath);
+            throw new RuntimeException(
+                "Archive contains too many entries ({$archive->numFiles} > " . self::MAX_ENTRIES . ")"
+            );
+        }
+
+        // Zip-slip protection: validate every entry before extracting.
+        // Also accumulate size/ratio stats to guard against decompression bombs (DoS).
         $resolvedTempDir = realpath($tempDirPath);
+        $totalUncompressedBytes = 0;
         for ($i = 0; $i < $archive->numFiles; $i++) {
             $entry = $archive->getNameIndex($i);
 
@@ -172,6 +192,29 @@ class FileService
                 $archive->close();
                 $this->filesystem->remove($tempDirPath);
                 throw new RuntimeException("Zip-slip detected in archive entry: $entry");
+            }
+
+            $stat = $archive->statIndex($i);
+            if ($stat !== false) {
+                $uncompressedSize = (int) $stat['size'];
+                $compressedSize = (int) $stat['comp_size'];
+
+                $totalUncompressedBytes += $uncompressedSize;
+                if ($totalUncompressedBytes > self::MAX_TOTAL_BYTES) {
+                    $archive->close();
+                    $this->filesystem->remove($tempDirPath);
+                    throw new RuntimeException(
+                        'Archive exceeds the maximum total uncompressed size of ' . self::MAX_TOTAL_BYTES . ' bytes'
+                    );
+                }
+
+                if ($compressedSize > 0 && ($uncompressedSize / $compressedSize) > self::MAX_RATIO) {
+                    $archive->close();
+                    $this->filesystem->remove($tempDirPath);
+                    throw new RuntimeException(
+                        "Suspicious compression ratio detected in archive entry '$entry' (possible zip bomb)"
+                    );
+                }
             }
         }
 

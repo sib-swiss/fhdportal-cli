@@ -208,4 +208,52 @@ class FileServiceTest extends TestCase
             self::assertStringContainsString('zip-slip', strtolower($e->getMessage()));
         }
     }
+
+    public function testExtractArchiveRejectsTooManyEntries(): void
+    {
+        $archivePath = $this->tmpDir . '/many-entries.zip';
+        $zip = new ZipArchive();
+        $zip->open($archivePath, ZipArchive::CREATE);
+        for ($i = 0; $i <= FileService::MAX_ENTRIES; $i++) {
+            $zip->addFromString("file{$i}.txt", 'x');
+        }
+        $zip->close();
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessageMatches('/too many entries/i');
+        $this->service->extractArchive($archivePath);
+    }
+
+    public function testExtractArchiveRejectsSuspiciousCompressionRatio(): void
+    {
+        $archivePath = $this->tmpDir . '/zipbomb.zip';
+        $zip = new ZipArchive();
+        $zip->open($archivePath, ZipArchive::CREATE);
+        // 10 MB of zero bytes compresses to a few KB — ratio far beyond
+        // FileService::MAX_RATIO (200) without needing a huge fixture.
+        $zip->addFromString('bomb.bin', str_repeat("\0", 10 * 1024 * 1024));
+        $zip->setCompressionName('bomb.bin', ZipArchive::CM_DEFLATE, 9);
+        $zip->close();
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessageMatches('/compression ratio|zip bomb/i');
+        $this->service->extractArchive($archivePath);
+    }
+
+    public function testExtractArchiveStillExtractsNormalSizedArchive(): void
+    {
+        $srcDir = $this->tmpDir . '/normal';
+        mkdir($srcDir);
+        file_put_contents($srcDir . '/a.txt', 'hello');
+        file_put_contents($srcDir . '/b.txt', 'world');
+
+        $archivePath = $this->service->createArchive($srcDir, $this->tmpDir . '/normal.zip', true);
+        $extractedDir = $this->service->extractArchive($archivePath);
+        try {
+            self::assertFileExists($extractedDir . '/a.txt');
+            self::assertFileExists($extractedDir . '/b.txt');
+        } finally {
+            $this->service->removeTempDirectory($extractedDir);
+        }
+    }
 }
