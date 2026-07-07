@@ -1,0 +1,24 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "title": "XssFixture",
+    "description": "Resource description with <script>alert('resource-xss')</script> and a pipe | character.",
+    "required": ["pk<script>alert1</script>"],
+    "additionalProperties": true,
+    "properties": {
+        "pk<script>alert1</script>": {
+            "type": "string",
+            "description": "Field description with <img src=x onerror=alert('field-xss')> payload.",
+            "pattern": "^foo|bar$",
+            "enum": ["<b>bold-enum</b>", "plain-value"]
+        }
+    },
+    "x-resource": {
+        "schema": {
+            "fields": [
+                { "name": "pk<script>alert1</script>", "constraints": { "required": true } }
+            ],
+            "primaryKey": ["pk<script>alert1</script>"]
+        }
+    }
+}

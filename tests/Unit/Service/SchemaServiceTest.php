@@ -440,4 +440,39 @@ class SchemaServiceTest extends TestCase
         self::assertSame('', $details['description']);
         self::assertSame('', $details['constraints']);
     }
+
+    public function testGenerateDocumentationEscapesResourceDescriptionHtml(): void
+    {
+        $doc = $this->service->generateDocumentation(['XssFixture']);
+
+        self::assertStringNotContainsString('<script>', $doc);
+        self::assertStringContainsString('&lt;script&gt;', $doc);
+    }
+
+    public function testGenerateDocumentationEscapesFieldDescriptionHtml(): void
+    {
+        $doc = $this->service->generateDocumentation(['XssFixture']);
+
+        self::assertStringNotContainsString('<img src=x onerror=', $doc);
+        self::assertStringContainsString('&lt;img', $doc);
+    }
+
+    public function testGenerateDocumentationEscapesPrimaryKeyFieldNameButKeepsUnderlineWrapper(): void
+    {
+        $doc = $this->service->generateDocumentation(['XssFixture']);
+
+        // App-authored formatting (the underline wrapper) survives...
+        self::assertStringContainsString('<u>', $doc);
+        // ...but the field name inside it must be escaped, not raw HTML.
+        self::assertStringNotContainsString('<u>pk<script>', $doc);
+        self::assertStringContainsString('&lt;script&gt;alert1&lt;/script&gt;', $doc);
+    }
+
+    public function testGenerateDocumentationEscapesEnumValues(): void
+    {
+        $doc = $this->service->generateDocumentation(['XssFixture']);
+
+        self::assertStringNotContainsString('<b>bold-enum</b>', $doc);
+        self::assertStringContainsString('&lt;b&gt;bold-enum&lt;/b&gt;', $doc);
+    }
 }

@@ -954,12 +954,14 @@ class SchemaService
                 continue;
             }
 
-            $fileName = $this->inflector->pluralize($this->nameConverter->normalize($resourceType))[0] . '.tsv';
+            $fileName = $this->escapeForMarkdown(
+                $this->inflector->pluralize($this->nameConverter->normalize($resourceType))[0] . '.tsv'
+            );
             $content .= "### {$fileName}\n\n";
-            $content .= "Resource Type: `{$resourceType}`\n\n";
+            $content .= "Resource Type: `" . $this->escapeForMarkdown($resourceType) . "`\n\n";
 
             if ($resourceSchema['status'] === 'SUCCESS' && isset($resourceSchema['schema']['description'])) {
-                $content .= "Description: {$resourceSchema['schema']['description']}\n\n";
+                $content .= "Description: " . $this->escapeForMarkdown((string) $resourceSchema['schema']['description']) . "\n\n";
             }
 
             $content .= "#### Fields\n\n";
@@ -984,7 +986,8 @@ class SchemaService
                 $fieldDetails = $this->getFieldDetails($resourceSchema, $field, $fieldName, $isPrimaryKey);
 
                 // Underline the field name if it is a primary key
-                $displayFieldName = $isPrimaryKey ? "<u>{$fieldName}</u>" : $fieldName;
+                $safeFieldName = $this->escapeForMarkdown($fieldName);
+                $displayFieldName = $isPrimaryKey ? "<u>{$safeFieldName}</u>" : $safeFieldName;
 
                 // Add the field details to the table
                 $content .= "| {$displayFieldName} | {$fieldDetails['type']} | {$fieldDetails['description']} | {$required} | {$fieldDetails['constraints']} | {$fieldDetails['validValues']} |\n";
@@ -994,6 +997,18 @@ class SchemaService
         }
 
         return $content;
+    }
+
+    /**
+     * Escape a schema-derived string before it enters the Markdown/HTML
+     * documentation. Neutralises raw HTML (CWE-79) and Markdown table
+     * delimiters ("|", newlines) so untrusted schema content cannot inject
+     * markup or corrupt the table structure.
+     */
+    private function escapeForMarkdown(string $value): string
+    {
+        $escaped = htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        return str_replace(['|', "\r\n", "\n", "\r"], ['\|', ' ', ' ', ' '], $escaped);
     }
 
     /**
@@ -1099,10 +1114,10 @@ class SchemaService
         // Handle array types
         if ($type === 'array' && isset($property['items']['type'])) {
             $itemType = strtolower($property['items']['type']);
-            return "array[{$itemType}]";
+            return $this->escapeForMarkdown("array[{$itemType}]");
         }
 
-        return $type;
+        return $this->escapeForMarkdown($type);
     }
 
     /**
@@ -1110,7 +1125,7 @@ class SchemaService
      */
     private function extractFieldDescription(array $property): string
     {
-        return isset($property['description']) ? $property['description'] : '';
+        return $this->escapeForMarkdown((string) ($property['description'] ?? ''));
     }
 
     /**
@@ -1127,19 +1142,19 @@ class SchemaService
 
         // Add standard constraints
         if (isset($property['minLength'])) {
-            $constraints[] = "minimum length: {$property['minLength']}";
+            $constraints[] = "minimum length: " . $this->escapeForMarkdown((string) $property['minLength']);
         }
         if (isset($property['maxLength'])) {
-            $constraints[] = "maximum length: {$property['maxLength']}";
+            $constraints[] = "maximum length: " . $this->escapeForMarkdown((string) $property['maxLength']);
         }
         if (isset($property['pattern'])) {
-            $constraints[] = "pattern: `{$property['pattern']}`";
+            $constraints[] = "pattern: `" . $this->escapeForMarkdown((string) $property['pattern']) . "`";
         }
         if (isset($property['minimum'])) {
-            $constraints[] = "minimum: {$property['minimum']}";
+            $constraints[] = "minimum: " . $this->escapeForMarkdown((string) $property['minimum']);
         }
         if (isset($property['maximum'])) {
-            $constraints[] = "maximum: {$property['maximum']}";
+            $constraints[] = "maximum: " . $this->escapeForMarkdown((string) $property['maximum']);
         }
         if (isset($property['uniqueItems']) && $property['uniqueItems']) {
             $constraints[] = 'unique items';
@@ -1163,7 +1178,7 @@ class SchemaService
             $enumValues = $property['enum'];
             sort($enumValues, SORT_STRING);
             $bulletedValues = array_map(function ($value) {
-                return '• `' . $value . '`';
+                return '• `' . $this->escapeForMarkdown((string) $value) . '`';
             }, $enumValues);
             return implode('<br>', $bulletedValues);
         }
