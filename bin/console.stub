@@ -16,12 +16,6 @@ $_ENV['APP_ENV'] = 'prod';
 $_ENV['APP_DEBUG'] = '0';
 unset($_ENV['APP_SECRET']);
 
-# Create a writable cache directory outside the PHAR
-$cacheDir = sys_get_temp_dir() . '/fega-cache';
-if (!is_dir($cacheDir)) {
-    @mkdir($cacheDir, 0755, true);
-}
-
 # Set default schema directory environment variable
 if (!getenv('FEGA_SCHEMA_DIR')) {
     $appName = 'fega';
@@ -44,6 +38,15 @@ if (!getenv('FEGA_API_URL')) {
 Phar::mapPhar('fega.phar');
 
 require_once 'phar://fega.phar/vendor/autoload.php';
+
+# Create a private, per-user cache directory — never a predictable,
+# world-readable shared-tmp path (CWE-377/379/427).
+try {
+    $cacheDir = (new \App\Service\AppDataService())->getCacheDirectory();
+} catch (\RuntimeException $e) {
+    fwrite(STDERR, $e->getMessage() . PHP_EOL);
+    exit(1);
+}
 
 $kernel = new Kernel($_SERVER['APP_ENV'], (bool) $_SERVER['APP_DEBUG'], $cacheDir);
 $application = new Application($kernel);

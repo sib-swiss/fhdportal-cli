@@ -8,6 +8,7 @@ use App\Service\AppDataService;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
+use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * Unit tests for AppDataService.
@@ -79,7 +80,87 @@ class AppDataServiceTest extends TestCase
 
     public function testGetCacheDirectoryReturnsNonEmptyString(): void
     {
-        $service = new AppDataService();
-        self::assertNotEmpty($service->getCacheDirectory());
+        [$restore, $tmpHome] = $this->withIsolatedHome();
+        try {
+            $service = new AppDataService();
+            self::assertNotEmpty($service->getCacheDirectory());
+        } finally {
+            $restore();
+            (new Filesystem())->remove($tmpHome);
+        }
+    }
+
+    public function testGetCacheDirectoryCreatesPrivateModeDirectory(): void
+    {
+        [$restore, $tmpHome] = $this->withIsolatedHome();
+        try {
+            $dir = (new AppDataService())->getCacheDirectory();
+            self::assertDirectoryExists($dir);
+            self::assertStringStartsWith($tmpHome, $dir);
+            if (PHP_OS_FAMILY !== 'Windows') {
+                self::assertSame(0700, fileperms($dir) & 0777);
+            }
+        } finally {
+            $restore();
+            (new Filesystem())->remove($tmpHome);
+        }
+    }
+
+    public function testGetCacheDirectoryIsScopedPerUserOnPosix(): void
+    {
+        if (PHP_OS_FAMILY === 'Windows') {
+            self::markTestSkipped('uid scoping does not apply on Windows');
+        }
+
+        [$restore, $tmpHome] = $this->withIsolatedHome();
+        try {
+            $dir = (new AppDataService())->getCacheDirectory();
+            $uid = function_exists('posix_getuid') ? posix_getuid() : getmyuid();
+            self::assertStringEndsWith((string) $uid, $dir);
+        } finally {
+            $restore();
+            (new Filesystem())->remove($tmpHome);
+        }
+    }
+
+    public function testGetCacheDirectoryReChmodsAPreExistingLooselyPermissionedDirectory(): void
+    {
+        if (PHP_OS_FAMILY === 'Windows') {
+            self::markTestSkipped('mode check does not apply on Windows');
+        }
+
+        [$restore, $tmpHome] = $this->withIsolatedHome();
+        try {
+            $service = new AppDataService();
+            $dir = $service->getCacheDirectory();
+            chmod($dir, 0777); // simulate a pre-planted/loosely-permissioned dir
+
+            $dir2 = $service->getCacheDirectory();
+            self::assertSame($dir, $dir2);
+            self::assertSame(0700, fileperms($dir2) & 0777);
+        } finally {
+            $restore();
+            (new Filesystem())->remove($tmpHome);
+        }
+    }
+
+    /** @return array{0: callable, 1: string} */
+    private function withIsolatedHome(): array
+    {
+        $tmpHome = sys_get_temp_dir() . '/fega-home-test-' . bin2hex(random_bytes(6));
+        mkdir($tmpHome, 0700, true);
+
+        $originalHome = getenv('HOME');
+        $originalXdg = getenv('XDG_CACHE_HOME');
+
+        putenv('HOME=' . $tmpHome);
+        putenv('XDG_CACHE_HOME'); // unset, so the Linux default falls back to $HOME/.cache
+
+        $restore = function () use ($originalHome, $originalXdg) {
+            putenv($originalHome === false ? 'HOME' : "HOME=$originalHome");
+            putenv($originalXdg === false ? 'XDG_CACHE_HOME' : "XDG_CACHE_HOME=$originalXdg");
+        };
+
+        return [$restore, $tmpHome];
     }
 }

@@ -69,10 +69,54 @@ class AppDataService
 
     public function getCacheDirectory(): string
     {
-        return match (PHP_OS_FAMILY) {
+        $isWindows = PHP_OS_FAMILY === 'Windows';
+
+        $baseDir = match (PHP_OS_FAMILY) {
             'Darwin' => Path::join(getenv('HOME'), 'Library', 'Caches', $this->appName),
-            'Windows' => Path::join(getenv('TEMP'), $this->appName . '-cache'),
-            default => Path::join(sys_get_temp_dir(), $this->appName . '-cache')
+            'Windows' => Path::join(getenv('LOCALAPPDATA') ?: getenv('TEMP'), $this->appName . '-cache'),
+            default => Path::join(getenv('XDG_CACHE_HOME') ?: Path::join(getenv('HOME'), '.cache'), $this->appName),
         };
+
+        // Scope to the current OS user so the path cannot be predicted or
+        // pre-planted by another local user (CWE-377/379/427).
+        $cacheDir = $isWindows ? $baseDir : Path::join($baseDir, (string) $this->currentUid());
+
+        $this->ensurePrivateDirectory($cacheDir, $isWindows);
+
+        return $cacheDir;
+    }
+
+    private function currentUid(): ?int
+    {
+        if (function_exists('posix_getuid')) {
+            return posix_getuid();
+        }
+        if (function_exists('getmyuid') && getmyuid() !== false) {
+            return (int) getmyuid();
+        }
+        return null;
+    }
+
+    /**
+     * @throws \RuntimeException if the directory cannot be created privately
+     *                            or is not owned by the current user
+     */
+    private function ensurePrivateDirectory(string $dir, bool $isWindows): void
+    {
+        if (!is_dir($dir) && !@mkdir($dir, 0700, true) && !is_dir($dir)) {
+            throw new \RuntimeException("Cannot create private cache directory: $dir");
+        }
+
+        if ($isWindows) {
+            return; // POSIX ownership is not meaningful here
+        }
+
+        @chmod($dir, 0700);
+
+        $uid = $this->currentUid();
+        $stat = @stat($dir);
+        if ($uid !== null && ($stat === false || $stat['uid'] !== $uid)) {
+            throw new \RuntimeException("Refusing to use cache directory not owned by current user: $dir");
+        }
     }
 }
