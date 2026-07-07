@@ -38,6 +38,14 @@ class UpdateCommand extends Command
     ) {
         parent::__construct();
         $this->apiBaseUrl = rtrim($params->get('api.base_url'), '/');
+
+        $scheme = strtolower((string) parse_url($this->apiBaseUrl, PHP_URL_SCHEME));
+        if ($scheme !== 'https') {
+            throw new InvalidArgumentException(
+                'FEGA_API_URL must use https:// — refusing to fetch schemas over an unverified channel.'
+            );
+        }
+
         $this->httpClient = $httpClient;
         $this->filesystem = $filesystem;
         $this->appDataService = $appDataService;

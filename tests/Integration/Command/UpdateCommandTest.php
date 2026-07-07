@@ -205,4 +205,26 @@ class UpdateCommandTest extends TestCase
         // In debug (-vvv) mode the stack trace SHOULD appear
         self::assertStringContainsString('#0 ', $output, 'Stack trace should appear in debug (-vvv) mode');
     }
+
+    public function testConstructorRejectsHttpBaseUrl(): void
+    {
+        $appDataService = $this->createStub(AppDataService::class);
+        $appDataService->method('getSchemaDirectory')->willReturn($this->tmpSchemaDir);
+        $params = new ParameterBag(['api.base_url' => 'http://insecure.example.test']);
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/https/i');
+
+        new UpdateCommand($params, new MockHttpClient(), $this->filesystem, $appDataService);
+    }
+
+    public function testConstructorRejectsNonHttpScheme(): void
+    {
+        $appDataService = $this->createStub(AppDataService::class);
+        $appDataService->method('getSchemaDirectory')->willReturn($this->tmpSchemaDir);
+        $params = new ParameterBag(['api.base_url' => 'ftp://example.test']);
+
+        $this->expectException(\InvalidArgumentException::class);
+        new UpdateCommand($params, new MockHttpClient(), $this->filesystem, $appDataService);
+    }
 }

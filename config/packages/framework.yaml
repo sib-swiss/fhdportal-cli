@@ -3,8 +3,9 @@ framework:
     secret: '%env(APP_SECRET)%'
     http_client:
         default_options:
-            verify_peer: false
-            verify_host: false
+            verify_peer: true
+            verify_host: true
+            crypto_method: !php/const STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT
 
     # Sessions are disabled: this is a CLI application with no session use.
     session: false
